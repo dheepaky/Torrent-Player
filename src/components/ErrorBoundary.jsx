@@ -11,7 +11,7 @@ export class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('[Magnet Player] Uncaught UI error:', error, errorInfo)
+    console.error('[Torrent Player] Uncaught UI error:', error, errorInfo)
   }
 
   handleReset = () => {

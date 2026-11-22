@@ -1,4 +1,4 @@
-// LocalStorage manager for Magnet Player settings and watch history
+// LocalStorage manager for Torrent Player settings and watch history
 
 export const SETTINGS_KEY = 'magnet_player_settings'
 export const HISTORY_KEY = 'magnet_player_history'

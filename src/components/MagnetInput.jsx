@@ -57,7 +57,7 @@ export function MagnetInput() {
         >
           <div className="relative flex-1 flex items-center">
             <div className="absolute left-3.5 text-slate-400 dark:text-slate-500 pointer-events-none">
-              <Magnet className="w-4 h-4 text-amber-500 dark:text-amber-400/90" />
+              <Magnet className="w-5 h-5 text-amber-500 dark:text-amber-400" />
             </div>
 
             <input
@@ -71,18 +71,18 @@ export function MagnetInput() {
               }
               disabled={!isReady}
               autoComplete="off"
-              className="w-full pl-10 pr-16 py-3 sm:py-3.5 bg-slate-50 dark:bg-[#0b0e17] border border-slate-200 dark:border-[#1e2538] rounded-xl text-slate-950 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-amber-500 text-xs sm:text-sm font-medium shadow-inner transition-colors disabled:opacity-50 min-h-[46px]"
+              className="w-full pl-11 pr-16 py-3 sm:py-3.5 bg-slate-50 dark:bg-[#0b0e17] border border-slate-200 dark:border-[#1e2538] rounded-xl text-slate-950 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-amber-500 text-sm sm:text-base font-medium shadow-inner transition-colors disabled:opacity-50 min-h-[48px]"
             />
 
-            <div className="absolute right-2 flex items-center gap-1">
+            <div className="absolute right-2 flex items-center gap-1.5">
               {inputVal && (
                 <button
                   type="button"
                   onClick={() => setInputVal('')}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-[#1d2436] transition-colors cursor-pointer"
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-[#1d2436] transition-colors cursor-pointer"
                   title="Clear input"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
 
@@ -90,60 +90,63 @@ export function MagnetInput() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={!isReady}
-                className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400 hover:bg-slate-200/70 dark:hover:bg-[#1d2436] transition-colors cursor-pointer"
+                className="p-2 rounded-lg text-slate-500 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400 hover:bg-slate-200/70 dark:hover:bg-[#1d2436] transition-colors cursor-pointer"
                 title="Import .torrent file from device"
               >
-                <FileUp className="w-4 h-4" />
+                <FileUp className="w-4.5 h-4.5" />
               </button>
             </div>
           </div>
 
-          {/* Import .torrent Button */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={!isReady}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-3 sm:py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#1a2130] dark:hover:bg-[#222b40] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-[#2a364f] rounded-xl font-semibold transition-all text-xs sm:text-sm cursor-pointer shrink-0 active:scale-95 disabled:opacity-40 min-h-[46px]"
-            title="Upload a .torrent file from your computer or phone"
-          >
-            <FileUp className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            <span>Import file</span>
-          </button>
+          {/* Action Buttons: 2 columns on mobile, inline on desktop */}
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+            {/* Import .torrent Button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={!isReady}
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#1a2130] dark:hover:bg-[#222b40] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-[#2a364f] rounded-xl font-bold transition-all text-xs sm:text-sm cursor-pointer shrink-0 active:scale-95 disabled:opacity-40 min-h-[48px]"
+              title="Upload a .torrent file from your computer or phone"
+            >
+              <FileUp className="w-4.5 h-4.5 text-amber-500 dark:text-amber-400" />
+              <span>Import file</span>
+            </button>
 
-          {/* Submit / Play Stream Button */}
-          <button
-            type="submit"
-            disabled={!isReady || !inputVal.trim()}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 sm:py-3.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold rounded-xl transition-all text-xs sm:text-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_2px_12px_rgba(245,158,11,0.25)] min-h-[46px] shrink-0 active:scale-95"
-          >
-            <Play className="w-4 h-4 fill-current" />
-            <span>Play stream</span>
-          </button>
+            {/* Submit / Play Stream Button */}
+            <button
+              type="submit"
+              disabled={!isReady || !inputVal.trim()}
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-black rounded-xl transition-all text-xs sm:text-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_2px_12px_rgba(245,158,11,0.25)] min-h-[48px] shrink-0 active:scale-95"
+            >
+              <Play className="w-4.5 h-4.5 fill-current" />
+              <span>Play stream</span>
+            </button>
+          </div>
         </form>
 
         {/* Quick-Help Chips Underneath */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-2.5 pb-1 text-[11px] text-slate-600 dark:text-slate-300">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-3 pb-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-slate-600 dark:text-slate-400 font-medium">Quick start:</span>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#1a2130] hover:bg-amber-50 dark:hover:bg-amber-500/15 text-slate-800 dark:text-amber-300 hover:text-amber-700 dark:hover:text-amber-200 border border-slate-200 dark:border-[#273248] transition-colors cursor-pointer font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1a2130] hover:bg-amber-50 dark:hover:bg-amber-500/15 text-slate-800 dark:text-amber-300 hover:text-amber-700 dark:hover:text-amber-200 border border-slate-200 dark:border-[#273248] transition-colors cursor-pointer font-semibold text-xs"
             >
-              <FileUp className="w-3 h-3 text-amber-500" />
+              <FileUp className="w-3.5 h-3.5 text-amber-500" />
               <span>Choose .torrent file</span>
             </button>
             <button
               type="button"
               onClick={() => downloadTorrent(sampleUrl)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#1a2130] hover:bg-amber-50 dark:hover:bg-amber-500/15 text-slate-800 dark:text-amber-300 hover:text-amber-700 dark:hover:text-amber-200 border border-slate-200 dark:border-[#273248] transition-colors cursor-pointer font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1a2130] hover:bg-amber-50 dark:hover:bg-amber-500/15 text-slate-800 dark:text-amber-300 hover:text-amber-700 dark:hover:text-amber-200 border border-slate-200 dark:border-[#273248] transition-colors cursor-pointer font-semibold text-xs"
             >
-              <Play className="w-3 h-3 fill-current text-amber-500" />
+              <Play className="w-3.5 h-3.5 fill-current text-amber-500" />
               <span>Try Sintel open movie</span>
             </button>
           </div>
 
-          <span className="hidden sm:inline text-slate-600 dark:text-slate-400 text-[11px] font-medium">
+          <span className="hidden sm:inline text-slate-600 dark:text-slate-400 text-xs font-medium">
             Drag &amp; drop .torrent anywhere
           </span>
         </div>
@@ -188,6 +191,17 @@ export function MagnetInput() {
               Cancel search
             </button>
           </div>
+
+          {/* Helpful tip if browser mode takes a while */}
+          {loadingStatus.isSearching && loadingStatus.count > 12 && !loadingStatus.isBackend && (
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2 animate-in fade-in">
+              <span className="text-amber-500 font-bold shrink-0">💡 Tip:</span>
+              <p>
+                Regular torrents require the streaming engine to connect to standard swarm peers. Run{' '}
+                <span className="font-mono font-bold text-amber-600 dark:text-amber-400">npm run server</span> in your project and open <span className="font-mono font-bold text-amber-600 dark:text-amber-400">http://localhost:4000</span> (or phone Wi-Fi port 4000) to stream any torrent instantly!
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

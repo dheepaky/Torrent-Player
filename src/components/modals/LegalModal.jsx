@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Scale, ShieldCheck, FileText, AlertCircle, X } from 'lucide-react'
+import { Scale, ShieldCheck, FileText, AlertCircle, X, Lock } from 'lucide-react'
 
 export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
   const [activeTab, setActiveTab] = useState(initialTab)
@@ -23,7 +23,7 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
             </div>
             <div>
               <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-tight">
-                Legal, DMCA &amp; Terms
+                Legal, Privacy &amp; Terms
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                 Client-Side Open Source P2P Protocol Compliance
@@ -41,36 +41,118 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
         </div>
 
         {/* Sleek Tab Navigation */}
-        <div className="flex border-b border-slate-200 dark:border-[#232b3e] bg-slate-50/70 dark:bg-[#0b0e17]/50 px-4 pt-1.5 gap-2 text-xs font-semibold">
+        <div className="flex border-b border-slate-200 dark:border-[#232b3e] bg-slate-50/70 dark:bg-[#0b0e17]/50 px-4 pt-1.5 gap-2 text-xs font-semibold overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab('privacy')}
+            className={`pb-2.5 px-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'privacy'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400 font-bold'
+                : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-slate-200'
+            }`}
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Privacy Policy</span>
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab('dmca')}
-            className={`pb-2.5 px-3.5 border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`pb-2.5 px-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
               activeTab === 'dmca'
                 ? 'border-amber-500 text-amber-600 dark:text-amber-400 font-bold'
                 : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-slate-200'
             }`}
           >
-            <ShieldCheck className="w-4 h-4" />
-            <span>DMCA &amp; Copyright Policy</span>
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>DMCA Policy</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('terms')}
-            className={`pb-2.5 px-3.5 border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`pb-2.5 px-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
               activeTab === 'terms'
                 ? 'border-amber-500 text-amber-600 dark:text-amber-400 font-bold'
                 : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-slate-200'
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5" />
             <span>Terms of Service</span>
           </button>
         </div>
 
         {/* Content Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed flex-1">
-          {activeTab === 'dmca' ? (
+          {activeTab === 'privacy' && (
+            <div className="space-y-4">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#0b0e17] border border-slate-200 dark:border-[#1f273b]">
+                <h4 className="font-bold text-slate-950 dark:text-white mb-1 text-sm flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-500" />
+                  <span>Privacy Policy &amp; Advertising Disclosures</span>
+                </h4>
+                <p className="text-slate-600 dark:text-slate-300 text-xs">
+                  We are committed to absolute user privacy. Torrent Player is an open-source, client-side web utility. We do not require accounts, we do not log IP addresses, and we never store your streaming activity on any server.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-950 dark:text-white mb-1 text-sm">
+                  1. Information We Do Not Collect
+                </h4>
+                <p className="text-slate-700 dark:text-slate-300">
+                  We do not collect names, email addresses, phone numbers, location data, or payment information. Torrent Player operates entirely in your browser window using client-side JavaScript.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-950 dark:text-white mb-1 text-sm">
+                  2. Third-Party Advertising (Google AdSense &amp; Partners)
+                </h4>
+                <p className="text-slate-700 dark:text-slate-300">
+                  This website may display advertisements served by Google AdSense, Adsterra, or other advertising networks. These third-party vendors use cookies (including the DoubleClick cookie) to serve ads to users based on their prior visits to this website and other sites across the Internet.
+                </p>
+                <p className="text-slate-700 dark:text-slate-300 mt-1.5">
+                  Users may opt out of personalized advertising by visiting{' '}
+                  <a
+                    href="https://www.google.com/settings/ads"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-600 dark:text-amber-400 underline font-semibold"
+                  >
+                    Google Ads Settings
+                  </a>{' '}
+                  or by visiting{' '}
+                  <a
+                    href="https://www.aboutads.info/choices/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-600 dark:text-amber-400 underline font-semibold"
+                  >
+                    aboutads.info
+                  </a>.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-950 dark:text-white mb-1 text-sm">
+                  3. Browser Local Storage
+                </h4>
+                <p className="text-slate-700 dark:text-slate-300">
+                  Torrent Player uses standard HTML5 Web Storage (localStorage) strictly on your device to remember user settings, such as theme preference (Dark/Light), volume level, and recent playback history. This information never leaves your device.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-950 dark:text-white mb-1 text-sm">
+                  4. WebRTC Peer-to-Peer Protocol
+                </h4>
+                <p className="text-slate-700 dark:text-slate-300">
+                  When streaming a torrent via WebRTC, your browser connects directly to other swarm participants. As inherent in all peer-to-peer protocols, other peers in the same swarm can see your network IP address as part of standard data routing.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'dmca' && (
             <div className="space-y-4">
               {/* Highlight Banner */}
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0b0e17] border border-slate-200 dark:border-[#1f273b] space-y-2.5">
@@ -79,7 +161,7 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
                   <span>Architecture &amp; Safe Harbor Overview</span>
                 </div>
                 <p className="text-slate-800 dark:text-slate-200 text-xs leading-normal">
-                  Magnet Player is a <strong>purely client-side web utility</strong> (HTML5/JavaScript) running directly in the user's browser. It acts as an interactive client for the WebTorrent/BitTorrent P2P protocol.
+                  Torrent Player is a <strong>purely client-side web utility</strong> (HTML5/JavaScript) running directly in the user's browser. It acts as an interactive client for the WebTorrent/BitTorrent P2P protocol.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-[11px]">
                   <div className="p-2.5 rounded-lg bg-white dark:bg-[#131722] border border-slate-200 dark:border-[#232b3e]">
@@ -103,7 +185,7 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
                   1. DMCA Notice &amp; Takedown Procedure
                 </h4>
                 <p className="text-slate-700 dark:text-slate-200">
-                  Because Magnet Player does not maintain content servers, hosting infrastructure, or a torrent search database, <strong>we have no technical capability to remove, modify, or take down files</strong> that reside on the decentralized BitTorrent network.
+                  Because Torrent Player does not maintain content servers, hosting infrastructure, or a torrent search database, <strong>we have no technical capability to remove, modify, or take down files</strong> that reside on the decentralized BitTorrent network.
                 </p>
                 <p className="text-slate-600 dark:text-slate-300 text-xs">
                   However, we respect the intellectual property rights of copyright holders and comply with the applicable provisions of the Digital Millennium Copyright Act (17 U.S.C. § 512).
@@ -125,14 +207,16 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
                 </ul>
               </div>
             </div>
-          ) : (
+          )}
+
+          {activeTab === 'terms' && (
             <div className="space-y-4">
               <div>
                 <h4 className="font-bold text-slate-950 dark:text-white mb-1 text-sm">
                   1. Acceptance of Terms
                 </h4>
                 <p className="text-slate-700 dark:text-slate-200">
-                  By accessing or using Magnet Player, you acknowledge that you have read, understood, and agreed to these Terms of Service. If you do not agree to these terms, please discontinue using this software immediately.
+                  By accessing or using Torrent Player, you acknowledge that you have read, understood, and agreed to these Terms of Service. If you do not agree to these terms, please discontinue using this software immediately.
                 </p>
               </div>
 
@@ -141,7 +225,7 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
                   2. Lawful &amp; Permitted Use Only
                 </h4>
                 <p className="text-slate-700 dark:text-slate-200">
-                  Magnet Player is created for personal, non-commercial, and lawful purposes, including streaming public domain material, Creative Commons content, open-source video releases, or media you own and possess the right to distribute.
+                  Torrent Player is created for personal, non-commercial, and lawful purposes, including streaming public domain material, Creative Commons content, open-source video releases, or media you own and possess the right to distribute.
                 </p>
                 <p className="mt-1 text-amber-700 dark:text-amber-300 text-xs font-medium">
                   ⚠️ You must not use this software to download, stream, or distribute copyrighted media without the explicit permission of the copyright owner. You are solely responsible for ensuring compliance with your local laws.
@@ -171,7 +255,7 @@ export function LegalModal({ isOpen, onClose, initialTab = 'dmca' }) {
                   5. Limitation of Liability
                 </h4>
                 <p className="text-slate-700 dark:text-slate-200">
-                  To the maximum extent permitted by law, the authors and contributors of Magnet Player shall not be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use this software.
+                  To the maximum extent permitted by law, the authors and contributors of Torrent Player shall not be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use this software.
                 </p>
               </div>
             </div>

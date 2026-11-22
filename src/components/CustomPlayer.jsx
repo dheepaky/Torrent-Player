@@ -16,6 +16,9 @@ import {
   PictureInPicture,
   Loader2,
   Sliders,
+  Scan,
+  MoreVertical,
+  X,
 } from 'lucide-react'
 import { useWebTorrent } from '../context/WebTorrentContext'
 import * as audio from '../utils/audio'
@@ -44,6 +47,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     setIsTheaterMode,
     resumePrompt,
     setResumePrompt,
+    stats,
   } = useWebTorrent()
 
   const playerContainerRef = useRef(null)
@@ -66,6 +70,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
   const [audioBoost, setAudioBoostVal] = useState(1.0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isForceLandscape, setIsForceLandscape] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [useNativeControls, setUseNativeControls] = useState(false)
 
@@ -82,6 +87,27 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
   const [showSubMenu, setShowSubMenu] = useState(false)
   const [showSpeedMenu, setShowSpeedMenu] = useState(false)
   const [showBoostMenu, setShowBoostMenu] = useState(false)
+  const [showMobileMoreMenu, setShowMobileMoreMenu] = useState(false)
+
+  // Fit Screen / Zoom options
+  const [fitMode, setFitMode] = useState('contain')
+  const [fitNotification, setFitNotification] = useState(null)
+
+  const cycleFitMode = () => {
+    const modes = [
+      { id: 'contain', label: 'Fit to Screen' },
+      { id: 'cover', label: 'Zoom / Fill (No Black Bars)' },
+      { id: 'fill', label: 'Stretch Full' },
+    ]
+    const curIdx = modes.findIndex((m) => m.id === fitMode)
+    const next = modes[(curIdx + 1) % modes.length]
+    setFitMode(next.id)
+    if (videoRef.current) {
+      videoRef.current.style.objectFit = next.id
+    }
+    setFitNotification(next.label)
+    setTimeout(() => setFitNotification(null), 1600)
+  }
 
   // Subtitle synchronization when torrent / file changes
   useEffect(() => {
@@ -126,22 +152,36 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     video.autoplay = true
     video.playsInline = true
     video.preload = 'auto'
+    video.setAttribute('playsinline', 'true')
+    video.setAttribute('webkit-playsinline', 'true')
+    video.setAttribute('controlsList', 'nodownload noplaybackrate')
     video.className =
-      'w-full h-full max-h-[74vh] object-contain cursor-pointer'
+      'w-full h-full cursor-pointer select-none touch-manipulation'
+    video.style.objectFit = fitMode
+    video.style.webkitTouchCallout = 'none'
+    video.style.webkitUserSelect = 'none'
+    video.style.userSelect = 'none'
+    video.style.touchAction = 'manipulation'
+    video.oncontextmenu = (e) => {
+      e.preventDefault()
+      return false
+    }
 
     container.appendChild(video)
     videoRef.current = video
 
-    // Stream the torrent file through the ServiceWorker
+    // Stream the torrent file through Node.js Backend or ServiceWorker
     try {
-      streamingFile.streamTo(video)
+      if (typeof streamingFile.streamTo === 'function') {
+        streamingFile.streamTo(video)
+      } else if (streamingFile.streamURL) {
+        video.src = streamingFile.streamURL
+      }
     } catch (err) {
-      try {
-        if (streamingFile.streamURL) {
-          video.src = streamingFile.streamURL
-        }
-      } catch (e2) {
-        console.error('[CustomPlayer] Stream setup error:', e2)
+      if (streamingFile.streamURL) {
+        video.src = streamingFile.streamURL
+      } else {
+        console.error('[CustomPlayer] Stream setup error:', err)
       }
     }
 
@@ -191,6 +231,8 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
         const torrentBufPct =
           totalFilePieces > 0 ? (downloadedPieces / totalFilePieces) * 100 : 0
         bufPct = Math.max(bufPct, torrentBufPct)
+      } else if (stats?.progress) {
+        bufPct = Math.max(bufPct, stats.progress)
       }
       if (bufferedBarRef.current) {
         bufferedBarRef.current.style.width = `${Math.min(100, bufPct)}%`
@@ -237,7 +279,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       )
     }
     const handleWaiting = () => {
-      if (!video.paused) {
+      if (!video.paused && video.currentTime > 0) {
         setIsBuffering(true)
       }
     }
@@ -247,6 +289,16 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     }
     const handleCanPlay = () => {
       setIsBuffering(false)
+    }
+    const handleLoadedData = () => {
+      setIsBuffering(false)
+    }
+    const handleCanPlayThrough = () => {
+      setIsBuffering(false)
+    }
+    const handleError = () => {
+      setIsBuffering(false)
+      console.warn('[CustomPlayer] Video error:', video.error)
     }
     const handleLoadedMetadata = () => {
       if (rangeInputRef.current) {
@@ -261,6 +313,9 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     video.addEventListener('waiting', handleWaiting)
     video.addEventListener('playing', handlePlaying)
     video.addEventListener('canplay', handleCanPlay)
+    video.addEventListener('loadeddata', handleLoadedData)
+    video.addEventListener('canplaythrough', handleCanPlayThrough)
+    video.addEventListener('error', handleError)
     video.addEventListener('loadedmetadata', handleLoadedMetadata)
     // Throttled History Save (at most once every 5 seconds)
     let lastSave = 0
@@ -280,24 +335,6 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     video.addEventListener('timeupdate', updateTimelineDOM)
     video.addEventListener('progress', updateTimelineDOM)
 
-    // Click on video toggles Play
-    video.onclick = () => {
-      if (!useNativeControls) {
-        if (video.paused) {
-          video.play().catch(() => {})
-        } else {
-          video.pause()
-        }
-      }
-    }
-
-    // Double-click on video toggles Fullscreen
-    video.ondblclick = () => {
-      if (!useNativeControls) {
-        toggleFullscreen()
-      }
-    }
-
     return () => {
       clearInterval(bufferInterval)
       video.removeEventListener('timeupdate', onTimeSave)
@@ -308,6 +345,9 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       video.removeEventListener('waiting', handleWaiting)
       video.removeEventListener('playing', handlePlaying)
       video.removeEventListener('canplay', handleCanPlay)
+      video.removeEventListener('loadeddata', handleLoadedData)
+      video.removeEventListener('canplaythrough', handleCanPlayThrough)
+      video.removeEventListener('error', handleError)
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
     }
   }, [streamingFile, torrent, useNativeControls, setResumePrompt])
@@ -328,8 +368,8 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     return () => document.removeEventListener('fullscreenchange', handleFsChange)
   }, [])
 
-  // Auto-hide controls when playing (throttled)
-  const handleMouseMove = useCallback(() => {
+  // Auto-hide controls and all bottom menus when playing
+  const showControlsTemporarily = useCallback(() => {
     setControlsVisible(true)
     if (hideControlsTimeoutRef.current) {
       clearTimeout(hideControlsTimeoutRef.current)
@@ -340,9 +380,40 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
         setShowSubMenu(false)
         setShowSpeedMenu(false)
         setShowBoostMenu(false)
-      }, 2500)
+        setShowMobileMoreMenu(false)
+      }, 2800)
     }
   }, [isPlaying])
+
+  // When playback begins, auto-hide controls and all submenus after 2.5s
+  useEffect(() => {
+    if (isPlaying) {
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+      hideControlsTimeoutRef.current = setTimeout(() => {
+        setControlsVisible(false)
+        setShowSubMenu(false)
+        setShowSpeedMenu(false)
+        setShowBoostMenu(false)
+        setShowMobileMoreMenu(false)
+      }, 2500)
+    } else {
+      setControlsVisible(true)
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+    }
+    return () => {
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+    }
+  }, [isPlaying])
+
+  const handleMouseMove = useCallback(() => {
+    showControlsTemporarily()
+  }, [showControlsTemporarily])
 
   const handleMouseLeave = useCallback(() => {
     if (isPlaying) {
@@ -350,6 +421,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       setShowSubMenu(false)
       setShowSpeedMenu(false)
       setShowBoostMenu(false)
+      setShowMobileMoreMenu(false)
     }
   }, [isPlaying])
 
@@ -363,6 +435,13 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       video.pause()
     }
   }
+
+  // Global contextmenu suppressor during long-press to block browser "Download video" popup
+  const suppressMenuRef = useRef((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    return false
+  })
 
   // Hold-to-2x speed functionality (touch and mouse)
   const handlePointerDown = (e) => {
@@ -385,6 +464,9 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       clearTimeout(holdTimeoutRef.current)
     }
 
+    // Suppress contextmenu during press
+    window.addEventListener('contextmenu', suppressMenuRef.current, { capture: true })
+
     // If video is playing, prepare hold-to-2x
     if (!video.paused) {
       holdTimeoutRef.current = setTimeout(() => {
@@ -397,7 +479,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
         try {
           if (navigator.vibrate) navigator.vibrate(35)
         } catch {}
-      }, 220)
+      }, 200)
     }
   }
 
@@ -406,6 +488,11 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       clearTimeout(holdTimeoutRef.current)
       holdTimeoutRef.current = null
     }
+
+    // Remove contextmenu suppressor after short delay to catch trailing events
+    setTimeout(() => {
+      window.removeEventListener('contextmenu', suppressMenuRef.current, { capture: true })
+    }, 300)
 
     const video = videoRef.current
     if (isHolding2xRef.current) {
@@ -418,11 +505,11 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       preventClickToggleRef.current = true
       setTimeout(() => {
         preventClickToggleRef.current = false
-      }, 150)
+      }, 200)
       return
     }
 
-    // If not holding and not prevented, single click toggles play/pause
+    // If not holding and not prevented, single click toggles play/pause or reveals controls
     if (!preventClickToggleRef.current) {
       if (
         e.target.closest(
@@ -431,7 +518,12 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       ) {
         return
       }
+      if (isPlaying && !controlsVisible) {
+        showControlsTemporarily()
+        return
+      }
       togglePlay()
+      showControlsTemporarily()
     }
   }
 
@@ -440,6 +532,10 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       clearTimeout(holdTimeoutRef.current)
       holdTimeoutRef.current = null
     }
+    setTimeout(() => {
+      window.removeEventListener('contextmenu', suppressMenuRef.current, { capture: true })
+    }, 300)
+
     if (isHolding2xRef.current) {
       isHolding2xRef.current = false
       setIsHolding2x(false)
@@ -448,7 +544,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       }
       setTimeout(() => {
         preventClickToggleRef.current = false
-      }, 150)
+      }, 200)
     }
   }
 
@@ -574,19 +670,79 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
     }
   }
 
-  // Fullscreen
+  // Fullscreen with iPhone / iPad Safari fallback
   const toggleFullscreen = async () => {
     const container = playerContainerRef.current
+    const video = videoRef.current
     if (!container) return
     try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen()
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen()
+        }
+        setIsForceLandscape(false)
+        try {
+          screen.orientation?.unlock()
+        } catch {}
       } else {
-        await container.requestFullscreen()
+        if (container.requestFullscreen) {
+          await container.requestFullscreen()
+          if (window.innerWidth < 768 && screen.orientation?.lock) {
+            screen.orientation.lock('landscape').catch(() => {})
+          }
+        } else if (container.webkitRequestFullscreen) {
+          await container.webkitRequestFullscreen()
+        } else if (video && video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen()
+        }
       }
     } catch (e) {
+      if (video && video.webkitEnterFullscreen) {
+        try {
+          video.webkitEnterFullscreen()
+        } catch {}
+      }
       console.warn('Fullscreen error:', e)
     }
+  }
+
+  // Mobile Screen Rotate & Big Screen Landscape Mode
+  const toggleRotateScreen = async () => {
+    const container = playerContainerRef.current
+    const video = videoRef.current
+
+    // 1. Android Chrome / Screen Orientation API
+    if (typeof screen !== 'undefined' && screen.orientation && screen.orientation.lock) {
+      try {
+        const isLandscape = window.matchMedia('(orientation: landscape)').matches
+        if (isLandscape) {
+          try {
+            screen.orientation.unlock()
+          } catch {}
+          setIsForceLandscape(false)
+        } else {
+          if (!document.fullscreenElement && container?.requestFullscreen) {
+            await container.requestFullscreen().catch(() => {})
+          }
+          await screen.orientation.lock('landscape')
+          setIsForceLandscape(true)
+        }
+        return
+      } catch {}
+    }
+
+    // 2. iOS Safari native landscape video player
+    if (video && video.webkitEnterFullscreen) {
+      try {
+        video.webkitEnterFullscreen()
+        return
+      } catch {}
+    }
+
+    // 3. Robust CSS-based full landscape transform (works 100% on all mobile devices!)
+    setIsForceLandscape((prev) => !prev)
   }
 
   // PiP
@@ -612,6 +768,10 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        return false
+      }}
       onDoubleClick={(e) => {
         if (
           !e.target.closest(
@@ -622,15 +782,33 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
         }
       }}
       className={`relative bg-black select-none group overflow-hidden ${
-        isFullscreen ? 'w-screen h-screen' : 'w-full min-h-[320px] max-h-[74vh]'
+        isForceLandscape
+          ? 'fixed inset-0 z-50 w-screen h-screen rotate-mode'
+          : isFullscreen
+          ? 'w-screen h-screen'
+          : 'w-full aspect-video sm:aspect-auto sm:min-h-[320px] sm:max-h-[74vh]'
       } flex items-center justify-center`}
     >
       {/* Container where the pristine fresh video element is mounted */}
       <div
         id="output"
         ref={outputContainerRef}
-        className="w-full h-full flex items-center justify-center"
+        className="w-full h-full flex items-center justify-center overflow-hidden"
       />
+
+      {/* Mobile Quick Rotate Pill */}
+      <button
+        type="button"
+        onClick={toggleRotateScreen}
+        className={`sm:hidden absolute top-2.5 right-2.5 z-30 inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/75 backdrop-blur-md border border-amber-500/40 rounded-full text-white text-[11px] font-semibold shadow-lg active:scale-95 touch-manipulation cursor-pointer transition-opacity duration-300 ${
+          controlsVisible || !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        title="Rotate Screen to Big Screen Landscape"
+        aria-label="Rotate Screen"
+      >
+        <RotateCw className="w-3.5 h-3.5 text-amber-400" />
+        <span>Rotate</span>
+      </button>
 
       {/* Hold for 2x Speed Active Floating Badge */}
       {isHolding2x && (
@@ -638,6 +816,14 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
           <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 animate-bounce" />
           <span className="font-mono text-amber-400 font-extrabold tracking-wide">2X SPEED</span>
           <span className="text-[10px] text-slate-300 font-sans font-normal opacity-80 uppercase tracking-widest hidden sm:inline">Release to resume</span>
+        </div>
+      )}
+
+      {/* Fit / Zoom Mode Floating Toast */}
+      {fitNotification && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 bg-black/85 backdrop-blur-md border border-amber-500/50 rounded-full text-white text-xs font-bold tracking-wide shadow-xl animate-fade-in pointer-events-none select-none flex items-center gap-1.5">
+          <Scan className="w-3.5 h-3.5 text-amber-400" />
+          <span>{fitNotification}</span>
         </div>
       )}
 
@@ -698,7 +884,7 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
       {/* Custom Bottom Controls Bar Overlay */}
       {!useNativeControls && (
         <div
-          className={`absolute bottom-0 inset-x-0 player-controls-container bg-gradient-to-t from-black/95 via-black/75 to-transparent px-3 sm:px-4 pt-8 pb-3 transition-opacity duration-300 z-20 ${
+          className={`absolute bottom-0 inset-x-0 player-controls-container bg-gradient-to-t from-black/95 via-black/75 to-transparent px-2.5 sm:px-4 pt-6 sm:pt-8 pb-2 sm:pb-3 transition-opacity duration-300 z-20 ${
             controlsVisible || !isPlaying
               ? 'opacity-100'
               : 'opacity-0 pointer-events-none'
@@ -751,9 +937,9 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
                 title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
               >
                 {isPlaying ? (
-                  <Pause className="w-5 h-5 fill-current" />
+                  <Pause className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                 ) : (
-                  <Play className="w-5 h-5 fill-current" />
+                  <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                 )}
               </button>
 
@@ -761,20 +947,20 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
               <button
                 type="button"
                 onClick={() => handleSkip(-10)}
-                className="p-1 hover:text-amber-400 transition-colors cursor-pointer"
+                className="hidden sm:block p-1.5 hover:text-amber-400 transition-colors cursor-pointer"
                 title="Rewind 10s"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-4.5 h-4.5" />
               </button>
 
               {/* Skip +10s */}
               <button
                 type="button"
                 onClick={() => handleSkip(10)}
-                className="p-1 hover:text-amber-400 transition-colors cursor-pointer"
+                className="hidden sm:block p-1.5 hover:text-amber-400 transition-colors cursor-pointer"
                 title="Forward 10s"
               >
-                <RotateCw className="w-4 h-4" />
+                <RotateCw className="w-4.5 h-4.5" />
               </button>
 
               {/* Volume Control */}
@@ -786,11 +972,11 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
                   title={isMuted ? 'Unmute' : 'Mute'}
                 >
                   {isMuted || volume === 0 ? (
-                    <VolumeX className="w-4 h-4 text-red-400" />
+                    <VolumeX className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-red-400" />
                   ) : volume < 0.5 ? (
-                    <Volume1 className="w-4 h-4" />
+                    <Volume1 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                   ) : (
-                    <Volume2 className="w-4 h-4" />
+                    <Volume2 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                   )}
                 </button>
 
@@ -808,228 +994,429 @@ export function CustomPlayer({ onOpenExternalPlayer }) {
               {/* Time Display (Direct DOM Text) */}
               <div
                 ref={timeTextRef}
-                className="font-mono text-[10px] sm:text-xs text-slate-300 ml-0.5 sm:ml-1 whitespace-nowrap"
+                className="font-mono text-xs sm:text-sm font-semibold text-slate-200 ml-0.5 sm:ml-1 whitespace-nowrap shrink-0"
               >
                 00:00 / 00:00
               </div>
             </div>
 
-            {/* Right Controls: Subtitles, Boost, Speed, Native Toggle, External, PiP, Theater, Fullscreen */}
-            <div className="flex items-center gap-1 sm:gap-2 relative">
-              {/* Subtitles Button & Menu */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSubMenu(!showSubMenu)
-                    setShowSpeedMenu(false)
-                    setShowBoostMenu(false)
-                  }}
-                  className={`p-1.5 rounded hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 ${
-                    activeSubtitle !== 'off'
-                      ? 'text-amber-400'
-                      : 'text-slate-300'
-                  }`}
-                  title="Subtitles / Closed Captions"
-                >
-                  <Subtitles className="w-4 h-4" />
-                  <span className="text-[10px] hidden sm:inline uppercase font-bold">
-                    {activeSubtitle !== 'off' ? 'CC' : ''}
-                  </span>
-                </button>
+            {/* Right Controls */}
+            <div className="flex items-center gap-1 sm:gap-1.5 relative">
+              {/* Desktop-only secondary controls */}
+              <div className="hidden sm:flex items-center gap-1 sm:gap-1.5">
+                {/* Subtitles Button & Menu */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSubMenu(!showSubMenu)
+                      setShowSpeedMenu(false)
+                      setShowBoostMenu(false)
+                    }}
+                    className={`p-1.5 rounded hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 ${
+                      activeSubtitle !== 'off'
+                        ? 'text-amber-400'
+                        : 'text-slate-300'
+                    }`}
+                    title="Subtitles / Closed Captions"
+                  >
+                    <Subtitles className="w-4 h-4" />
+                    <span className="text-[10px] hidden md:inline uppercase font-bold">
+                      {activeSubtitle !== 'off' ? 'CC' : ''}
+                    </span>
+                  </button>
 
-                {showSubMenu && (
-                  <div className="absolute right-0 bottom-full mb-2 w-48 sm:w-52 max-h-60 overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 z-40 text-xs animate-in fade-in slide-in-from-bottom-2">
-                    <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1">
-                      Select Subtitles
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleSubtitleSelect('off')}
-                      className={`w-full text-left px-2.5 py-1.5 rounded transition-colors ${
-                        activeSubtitle === 'off'
-                          ? 'bg-amber-500/20 text-amber-300 font-bold'
-                          : 'hover:bg-slate-800 text-slate-200'
-                      }`}
-                    >
-                      Off
-                    </button>
-                    {availableSubtitles.map((sub, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleSubtitleSelect(sub.path)}
-                        className={`w-full text-left px-2.5 py-1.5 rounded truncate transition-colors ${
-                          activeSubtitle === sub.path
-                            ? 'bg-amber-500/20 text-amber-300 font-bold'
-                            : 'hover:bg-slate-800 text-slate-200'
-                        }`}
-                        title={sub.name}
-                      >
-                        {sub.name}
-                      </button>
-                    ))}
-                    <div className="border-t border-slate-800 mt-1 pt-1">
+                  {showSubMenu && (
+                    <div className="absolute right-0 bottom-full mb-2 w-48 sm:w-52 max-h-60 overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 z-40 text-xs animate-in fade-in slide-in-from-bottom-2">
+                      <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1">
+                        Select Subtitles
+                      </div>
                       <button
                         type="button"
-                        onClick={() => customSubInputRef.current?.click()}
-                        className="w-full text-left px-2.5 py-1.5 hover:bg-slate-800 text-sky-400 font-semibold rounded transition-colors"
-                      >
-                        + Upload Subtitle (.srt/.vtt)
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  ref={customSubInputRef}
-                  accept=".srt,.vtt"
-                  onChange={handleCustomSubFile}
-                  className="hidden"
-                />
-              </div>
-
-              {/* Audio Boost Dropdown */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowBoostMenu(!showBoostMenu)
-                    setShowSubMenu(false)
-                    setShowSpeedMenu(false)
-                  }}
-                  className={`p-1.5 rounded hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 ${
-                    audioBoost > 1.0 ? 'text-amber-400 font-bold' : 'text-slate-300'
-                  }`}
-                  title="Audio Booster (up to 300%)"
-                >
-                  <Zap className="w-4 h-4" />
-                  <span className="text-[10px] hidden sm:inline font-mono">
-                    {Math.round(audioBoost * 100)}%
-                  </span>
-                </button>
-
-                {showBoostMenu && (
-                  <div className="absolute right-0 bottom-full mb-2 w-36 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 z-40 text-xs animate-in fade-in slide-in-from-bottom-2">
-                    <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1">
-                      Audio Boost
-                    </div>
-                    {[1.0, 1.5, 2.0, 3.0].map((b) => (
-                      <button
-                        key={b}
-                        type="button"
-                        onClick={() => handleBoostSelect(b)}
+                        onClick={() => handleSubtitleSelect('off')}
                         className={`w-full text-left px-2.5 py-1.5 rounded transition-colors ${
-                          audioBoost === b
+                          activeSubtitle === 'off'
                             ? 'bg-amber-500/20 text-amber-300 font-bold'
                             : 'hover:bg-slate-800 text-slate-200'
                         }`}
                       >
-                        {Math.round(b * 100)}% {b === 1.0 ? '(Normal)' : '(Boost)'}
+                        Off
                       </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      {availableSubtitles.map((sub, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleSubtitleSelect(sub.path)}
+                          className={`w-full text-left px-2.5 py-1.5 rounded truncate transition-colors ${
+                            activeSubtitle === sub.path
+                              ? 'bg-amber-500/20 text-amber-300 font-bold'
+                              : 'hover:bg-slate-800 text-slate-200'
+                          }`}
+                          title={sub.name}
+                        >
+                          {sub.name}
+                        </button>
+                      ))}
+                      <div className="border-t border-slate-800 mt-1 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => customSubInputRef.current?.click()}
+                          className="w-full text-left px-2.5 py-1.5 hover:bg-slate-800 text-sky-400 font-semibold rounded transition-colors"
+                        >
+                          + Upload Subtitle (.srt/.vtt)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    ref={customSubInputRef}
+                    accept=".srt,.vtt"
+                    onChange={handleCustomSubFile}
+                    className="hidden"
+                  />
+                </div>
 
-              {/* Playback Speed Menu */}
-              <div className="relative">
+                {/* Audio Boost Dropdown */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowBoostMenu(!showBoostMenu)
+                      setShowSubMenu(false)
+                      setShowSpeedMenu(false)
+                    }}
+                    className={`p-1.5 rounded hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 ${
+                      audioBoost > 1.0 ? 'text-amber-400 font-bold' : 'text-slate-300'
+                    }`}
+                    title="Audio Booster (up to 300%)"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span className="text-[10px] hidden md:inline font-mono">
+                      {Math.round(audioBoost * 100)}%
+                    </span>
+                  </button>
+
+                  {showBoostMenu && (
+                    <div className="absolute right-0 bottom-full mb-2 w-36 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 z-40 text-xs animate-in fade-in slide-in-from-bottom-2">
+                      <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1">
+                        Audio Boost
+                      </div>
+                      {[1.0, 1.5, 2.0, 3.0].map((b) => (
+                        <button
+                          key={b}
+                          type="button"
+                          onClick={() => handleBoostSelect(b)}
+                          className={`w-full text-left px-2.5 py-1.5 rounded transition-colors ${
+                            audioBoost === b
+                              ? 'bg-amber-500/20 text-amber-300 font-bold'
+                              : 'hover:bg-slate-800 text-slate-200'
+                          }`}
+                        >
+                          {Math.round(b * 100)}% {b === 1.0 ? '(Normal)' : '(Boost)'}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Playback Speed Menu */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSpeedMenu(!showSpeedMenu)
+                      setShowSubMenu(false)
+                      setShowBoostMenu(false)
+                    }}
+                    className="p-1.5 rounded hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 text-slate-300"
+                    title="Playback Speed"
+                  >
+                    <Gauge className="w-4 h-4" />
+                    <span className="text-[10px] font-mono hidden md:inline">
+                      {playbackSpeed}x
+                    </span>
+                  </button>
+
+                  {showSpeedMenu && (
+                    <div className="absolute right-0 bottom-full mb-2 w-28 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 z-40 text-xs animate-in fade-in slide-in-from-bottom-2">
+                      <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1">
+                        Speed
+                      </div>
+                      {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((spd) => (
+                        <button
+                          key={spd}
+                          type="button"
+                          onClick={() => handleSpeedSelect(spd)}
+                          className={`w-full text-left px-2.5 py-1.5 rounded transition-colors ${
+                            playbackSpeed === spd
+                              ? 'bg-amber-500/20 text-amber-300 font-bold'
+                              : 'hover:bg-slate-800 text-slate-200'
+                          }`}
+                        >
+                          {spd}x
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Toggle to native browser controls */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowSpeedMenu(!showSpeedMenu)
-                    setShowSubMenu(false)
-                    setShowBoostMenu(false)
-                  }}
-                  className="p-1.5 rounded hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 text-slate-300"
-                  title="Playback Speed"
+                  onClick={() => setUseNativeControls(true)}
+                  className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer hidden md:block"
+                  title="Switch to Native Player Controls"
                 >
-                  <Gauge className="w-4 h-4" />
-                  <span className="text-[10px] font-mono hidden sm:inline">
-                    {playbackSpeed}x
-                  </span>
+                  <Sliders className="w-4 h-4" />
                 </button>
 
-                {showSpeedMenu && (
-                  <div className="absolute right-0 bottom-full mb-2 w-28 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 z-40 text-xs animate-in fade-in slide-in-from-bottom-2">
-                    <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1">
-                      Speed
-                    </div>
-                    {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((spd) => (
-                      <button
-                        key={spd}
-                        type="button"
-                        onClick={() => handleSpeedSelect(spd)}
-                        className={`w-full text-left px-2.5 py-1.5 rounded transition-colors ${
-                          playbackSpeed === spd
-                            ? 'bg-amber-500/20 text-amber-300 font-bold'
-                            : 'hover:bg-slate-800 text-slate-200'
-                        }`}
-                      >
-                        {spd}x
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* External Player */}
+                <button
+                  type="button"
+                  onClick={() => onOpenExternalPlayer(streamingFile)}
+                  className="p-1.5 text-slate-300 hover:text-sky-400 transition-colors cursor-pointer hidden sm:block"
+                  title="Play in External Player (VLC / IINA / MPV)"
+                >
+                  <Tv className="w-4 h-4" />
+                </button>
+
+                {/* PiP */}
+                <button
+                  type="button"
+                  onClick={handlePip}
+                  className="p-1.5 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer hidden sm:block"
+                  title="Picture in Picture"
+                >
+                  <PictureInPicture className="w-4 h-4" />
+                </button>
+
+                {/* Theater Mode */}
+                <button
+                  type="button"
+                  onClick={() => setIsTheaterMode(!isTheaterMode)}
+                  className="p-1.5 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer hidden sm:block"
+                  title="Toggle Theater Mode"
+                >
+                  <span className="text-xs font-mono font-bold">
+                    {isTheaterMode ? '⇱' : '⇲'}
+                  </span>
+                </button>
               </div>
 
-              {/* Toggle to native browser controls */}
+              {/* Fit Screen / Zoom Options (Contain / Cover / Stretch) - Visible on Mobile & Desktop */}
               <button
                 type="button"
-                onClick={() => setUseNativeControls(true)}
-                className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer hidden md:block"
-                title="Switch to Native Player Controls"
+                onClick={cycleFitMode}
+                className="p-1.5 sm:p-2 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer active:scale-95 touch-manipulation flex items-center gap-1.5"
+                title={`Screen Fit: ${fitMode === 'contain' ? 'Fit Screen' : fitMode === 'cover' ? 'Fill / Zoom (No Black Bars)' : 'Stretch'}`}
+                aria-label="Screen Fit / Zoom"
               >
-                <Sliders className="w-4 h-4" />
-              </button>
-
-              {/* External Player */}
-              <button
-                type="button"
-                onClick={() => onOpenExternalPlayer(streamingFile)}
-                className="p-1.5 text-slate-300 hover:text-sky-400 transition-colors cursor-pointer hidden sm:block"
-                title="Play in External Player (VLC / IINA / MPV)"
-              >
-                <Tv className="w-4 h-4" />
-              </button>
-
-              {/* PiP */}
-              <button
-                type="button"
-                onClick={handlePip}
-                className="p-1.5 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer hidden sm:block"
-                title="Picture in Picture"
-              >
-                <PictureInPicture className="w-4 h-4" />
-              </button>
-
-              {/* Theater Mode */}
-              <button
-                type="button"
-                onClick={() => setIsTheaterMode(!isTheaterMode)}
-                className="p-1.5 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer hidden sm:block"
-                title="Toggle Theater Mode"
-              >
-                <span className="text-xs font-mono font-bold">
-                  {isTheaterMode ? '⇱' : '⇲'}
+                <Scan className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                <span className="text-xs font-bold hidden sm:inline uppercase">
+                  {fitMode === 'contain' ? 'Fit' : fitMode === 'cover' ? 'Zoom' : 'Stretch'}
                 </span>
+              </button>
+
+              {/* Screen Rotate / Landscape Mode for Mobile */}
+              <button
+                type="button"
+                onClick={toggleRotateScreen}
+                className={`p-1.5 sm:p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center active:scale-95 touch-manipulation ${
+                  isForceLandscape
+                    ? 'text-amber-400 bg-amber-500/20'
+                    : 'text-slate-300 hover:text-amber-400'
+                }`}
+                title="Rotate Screen / Big Screen Landscape"
+                aria-label="Rotate screen"
+              >
+                <RotateCw className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </button>
 
               {/* Fullscreen */}
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="p-1.5 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer active:scale-95 touch-manipulation"
                 title={isFullscreen ? 'Exit Fullscreen (F)' : 'Fullscreen (F)'}
+                aria-label="Fullscreen"
               >
                 {isFullscreen ? (
-                  <Minimize className="w-4 h-4" />
+                  <Minimize className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                 ) : (
-                  <Maximize className="w-4 h-4" />
+                  <Maximize className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                 )}
+              </button>
+
+              {/* Mobile 3-Dots More Menu Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMobileMoreMenu(!showMobileMoreMenu)
+                  setShowSubMenu(false)
+                  setShowSpeedMenu(false)
+                  setShowBoostMenu(false)
+                }}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors cursor-pointer sm:hidden active:scale-95 touch-manipulation ${
+                  showMobileMoreMenu ? 'text-amber-400 bg-slate-800' : 'text-slate-300 hover:text-white'
+                }`}
+                title="More playback options"
+                aria-label="More options"
+              >
+                <MoreVertical className="w-4.5 h-4.5" />
               </button>
             </div>
           </div>
+
+          {/* Mobile Bottom Sheet Menu */}
+          {showMobileMoreMenu && (
+            <div className="sm:hidden mt-2 p-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl z-50 text-xs text-white space-y-3 animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+                <span className="font-bold text-amber-400 text-xs">
+                  Playback Settings
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileMoreMenu(false)}
+                  className="p-1 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Subtitles */}
+              <div>
+                <div className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 flex items-center gap-1">
+                  <Subtitles className="w-3 h-3 text-amber-400" />
+                  <span>Subtitles ({activeSubtitle !== 'off' ? 'Active' : 'Off'})</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSubtitleSelect('off')
+                      setShowMobileMoreMenu(false)
+                    }}
+                    className={`px-2 py-1 rounded text-[11px] font-medium cursor-pointer ${
+                      activeSubtitle === 'off'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
+                        : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    Off
+                  </button>
+                  {availableSubtitles.map((sub, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        handleSubtitleSelect(sub.path)
+                        setShowMobileMoreMenu(false)
+                      }}
+                      className={`px-2 py-1 rounded text-[11px] truncate max-w-[130px] font-medium cursor-pointer ${
+                        activeSubtitle === sub.path
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
+                          : 'bg-slate-800 text-slate-300'
+                      }`}
+                    >
+                      {sub.name}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      customSubInputRef.current?.click()
+                      setShowMobileMoreMenu(false)
+                    }}
+                    className="px-2 py-1 rounded text-[11px] bg-slate-800 text-sky-400 font-medium cursor-pointer"
+                  >
+                    + Upload .srt
+                  </button>
+                </div>
+              </div>
+
+              {/* Playback Speed */}
+              <div className="pt-2 border-t border-slate-800">
+                <div className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 flex items-center gap-1">
+                  <Gauge className="w-3 h-3 text-amber-400" />
+                  <span>Speed ({playbackSpeed}x)</span>
+                </div>
+                <div className="grid grid-cols-6 gap-1">
+                  {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((spd) => (
+                    <button
+                      key={spd}
+                      type="button"
+                      onClick={() => {
+                        handleSpeedSelect(spd)
+                        setShowMobileMoreMenu(false)
+                      }}
+                      className={`py-1 rounded text-[11px] text-center font-mono font-medium cursor-pointer ${
+                        playbackSpeed === spd
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
+                          : 'bg-slate-800 text-slate-300'
+                      }`}
+                    >
+                      {spd}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Audio Boost */}
+              <div className="pt-2 border-t border-slate-800">
+                <div className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-amber-400" />
+                  <span>Audio Boost ({Math.round(audioBoost * 100)}%)</span>
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  {[1.0, 1.5, 2.0, 3.0].map((b) => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => {
+                        handleBoostSelect(b)
+                        setShowMobileMoreMenu(false)
+                      }}
+                      className={`py-1 rounded text-[11px] text-center font-mono font-medium cursor-pointer ${
+                        audioBoost === b
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
+                          : 'bg-slate-800 text-slate-300'
+                      }`}
+                    >
+                      {Math.round(b * 100)}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Extra Mobile Actions: External Player & Native Player */}
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMobileMoreMenu(false)
+                    onOpenExternalPlayer(streamingFile)
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg text-xs font-semibold cursor-pointer"
+                >
+                  <Tv className="w-3.5 h-3.5" />
+                  <span>External App</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMobileMoreMenu(false)
+                    setUseNativeControls(true)
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold cursor-pointer"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Native Controls</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

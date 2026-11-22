@@ -14,7 +14,7 @@ export function AboutModal({ isOpen, onClose }) {
               <Info className="w-4 h-4" />
             </div>
             <h3 className="font-bold text-slate-900 dark:text-white text-base">
-              About Magnet Player
+              About Torrent Player
             </h3>
           </div>
           <button
@@ -30,7 +30,7 @@ export function AboutModal({ isOpen, onClose }) {
         {/* Content */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed flex-1">
           <p>
-            <strong className="text-slate-900 dark:text-white">Magnet Player</strong> is a browser-based torrent streaming application designed for immediate playback without installing desktop torrent clients or browser plugins.
+            <strong className="text-slate-900 dark:text-white">Torrent Player</strong> is a browser-based torrent streaming application designed for immediate playback without installing desktop torrent clients or browser plugins.
           </p>
 
           <div className="p-3.5 bg-slate-50 dark:bg-[#0b0e17] border border-slate-200 dark:border-[#1f273b] rounded-xl space-y-1.5 text-xs">

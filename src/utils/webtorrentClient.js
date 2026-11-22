@@ -1,4 +1,4 @@
-// WebTorrent Singleton Engine for Magnet Player
+// WebTorrent Singleton Engine for Torrent Player
 
 import * as storage from './storage.js'
 

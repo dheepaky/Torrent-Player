@@ -42,17 +42,17 @@ export function FilePicker({ onOpenExternalPlayer }) {
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-4 py-3.5 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1a2030] transition-colors cursor-pointer"
+          className="w-full px-4 py-4 flex items-center justify-between text-left text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1a2030] transition-colors cursor-pointer"
         >
-          <span className="flex items-center gap-2.5">
-            <Folder className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+          <span className="flex items-center gap-3">
+            <Folder className="w-5 h-5 text-amber-500 dark:text-amber-400" />
             <span>Files in torrent</span>
-            <span className="text-[11px] bg-slate-100 dark:bg-[#1a2030] border border-slate-200 dark:border-[#2a364f] text-slate-700 dark:text-slate-300 font-mono px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-slate-100 dark:bg-[#1a2030] border border-slate-200 dark:border-[#2a364f] text-slate-700 dark:text-slate-300 font-mono px-2.5 py-0.5 rounded-full font-bold">
               {torrent.files.length}
             </span>
           </span>
           <ChevronDown
-            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+            className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
               isExpanded ? 'rotate-180' : ''
             }`}
           />
@@ -60,7 +60,7 @@ export function FilePicker({ onOpenExternalPlayer }) {
 
         {/* Files List */}
         {isExpanded && (
-          <ul className="divide-y divide-slate-100 dark:divide-[#232b3e] max-h-72 overflow-y-auto">
+          <ul className="divide-y divide-slate-100 dark:divide-[#232b3e] max-h-80 overflow-y-auto">
             {sortedFiles.map((file, idx) => {
               const isCurrent = streamingFile?.path === file.path
               const playable = isPlayableMedia(file.name)
@@ -70,40 +70,40 @@ export function FilePicker({ onOpenExternalPlayer }) {
               return (
                 <li
                   key={idx}
-                  className={`px-4 py-3 flex flex-wrap items-center justify-between gap-2.5 text-xs hover:bg-slate-50 dark:hover:bg-[#181f2f] transition-colors ${
+                  className={`px-4 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm hover:bg-slate-50 dark:hover:bg-[#181f2f] transition-colors ${
                     isCurrent ? 'bg-amber-500/10' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <span className="text-base shrink-0">
+                    <span className="text-lg shrink-0">
                       {getFileIcon(file.name)}
                     </span>
                     <div className="truncate">
                       <p
-                        className={`truncate font-semibold ${
+                        className={`truncate font-bold ${
                           isCurrent
-                            ? 'text-amber-600 dark:text-amber-400 font-bold'
+                            ? 'text-amber-600 dark:text-amber-400'
                             : 'text-slate-900 dark:text-slate-200'
                         }`}
                         title={file.name}
                       >
                         {file.name}
                       </p>
-                      <span className="text-slate-700 dark:text-slate-300 text-[11px] font-mono font-medium">
+                      <span className="text-slate-600 dark:text-slate-400 text-xs font-mono font-medium">
                         {formatBytes(file.length)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     {playable && (
                       <button
                         type="button"
                         onClick={() => playFile(file)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition-all cursor-pointer shadow-sm active:scale-95"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs sm:text-sm transition-all cursor-pointer shadow-sm active:scale-95"
                         title="Stream this file now"
                       >
-                        <Play className="w-3 h-3 fill-current" />
+                        <Play className="w-3.5 h-3.5 fill-current" />
                         <span>Play</span>
                       </button>
                     )}
@@ -111,23 +111,23 @@ export function FilePicker({ onOpenExternalPlayer }) {
                     <button
                       type="button"
                       onClick={() => handleSave(file)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-[#1a2030] hover:bg-slate-200 dark:hover:bg-[#222b40] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#2a364f] rounded-lg text-xs font-semibold transition-all cursor-pointer active:scale-95"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 dark:bg-[#1a2030] hover:bg-slate-200 dark:hover:bg-[#222b40] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#2a364f] rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer active:scale-95"
                       title="Save file to disk"
                     >
-                      <Download className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       <span>{saveText}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleCopyLink(file)}
-                      className="p-1.5 bg-slate-100 dark:bg-[#1a2030] hover:bg-slate-200 dark:hover:bg-[#222b40] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#2a364f] rounded-lg text-xs transition-all cursor-pointer active:scale-95"
+                      className="p-2 bg-slate-100 dark:bg-[#1a2030] hover:bg-slate-200 dark:hover:bg-[#222b40] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#2a364f] rounded-lg text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
                       title="Copy stream link"
                     >
                       {isCopied ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       ) : (
-                        <Link2 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                        <Link2 className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       )}
                     </button>
 
@@ -135,10 +135,10 @@ export function FilePicker({ onOpenExternalPlayer }) {
                       <button
                         type="button"
                         onClick={() => onOpenExternalPlayer(file)}
-                        className="p-1.5 bg-slate-100 dark:bg-[#1a2030] hover:bg-slate-200 dark:hover:bg-[#222b40] text-sky-600 dark:text-sky-400 border border-slate-200 dark:border-[#2a364f] rounded-lg text-xs transition-all cursor-pointer active:scale-95"
+                        className="p-2 bg-slate-100 dark:bg-[#1a2030] hover:bg-slate-200 dark:hover:bg-[#222b40] text-sky-600 dark:text-sky-400 border border-slate-200 dark:border-[#2a364f] rounded-lg text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
                         title="Open in VLC / External Player"
                       >
-                        <Tv className="w-3.5 h-3.5" />
+                        <Tv className="w-4 h-4" />
                       </button>
                     )}
                   </div>

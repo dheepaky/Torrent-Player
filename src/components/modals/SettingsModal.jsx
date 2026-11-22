@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import * as storage from '../../utils/storage'
 import { formatBytes } from '../../utils/format'
-import { Settings, X, HardDrive, Trash2, Check } from 'lucide-react'
+import { useWebTorrent } from '../../context/WebTorrentContext'
+import { Settings, X, HardDrive, Trash2, Check, Smartphone, Server, RefreshCw, Copy } from 'lucide-react'
 
 export function SettingsModal({ isOpen, onClose }) {
+  const { backendInfo, detectBackend } = useWebTorrent()
   const [trackersText, setTrackersText] = useState('')
   const [maxConns, setMaxConns] = useState(55)
   const [storageEstimate, setStorageEstimate] = useState({ usage: 0, quota: 0 })
   const [statusMsg, setStatusMsg] = useState('')
   const [isClearingAll, setIsClearingAll] = useState(false)
+  const [copiedIp, setCopiedIp] = useState(null)
 
   const loadSettings = async () => {
     const s = storage.loadSettings()
@@ -104,6 +107,98 @@ export function SettingsModal({ isOpen, onClose }) {
 
         {/* Content */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm flex-1">
+          {/* Local Streaming Engine & Mobile Streaming Section */}
+          <div className="bg-slate-50 dark:bg-[#0b0e17] p-4 rounded-xl border border-slate-200 dark:border-[#1e2538] space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold">
+                <Server className="w-4 h-4 text-emerald-500" />
+                <h4>Local Streaming Engine &amp; Mobile Wi-Fi</h4>
+              </div>
+              <button
+                type="button"
+                onClick={detectBackend}
+                className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer"
+                title="Refresh engine status"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Check status</span>
+              </button>
+            </div>
+
+            {backendInfo?.isConnected ? (
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>
+                    Connected on port {backendInfo.port} — Full BitTorrent swarm streaming active.
+                  </span>
+                </div>
+
+                {backendInfo.localIps && backendInfo.localIps.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-slate-200 dark:border-[#1e2538]">
+                    <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-semibold mb-1 text-xs">
+                      <Smartphone className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Stream on Mobile Phone (Same Wi-Fi):</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mb-2">
+                      Open this URL in your mobile phone browser to stream directly:
+                    </p>
+                    <div className="space-y-1">
+                      {backendInfo.localIps.map((ip) => {
+                        const url = `http://${ip}:${backendInfo.port}`
+                        return (
+                          <div
+                            key={ip}
+                            className="flex items-center justify-between bg-white dark:bg-[#131722] border border-slate-200 dark:border-[#232b3e] px-2.5 py-1.5 rounded-lg text-xs font-mono"
+                          >
+                            <span className="text-amber-600 dark:text-amber-400 font-bold">
+                              {url}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(url)
+                                setCopiedIp(url)
+                                setTimeout(() => setCopiedIp(null), 2000)
+                              }}
+                              className="text-[10px] text-slate-600 dark:text-slate-300 hover:text-amber-500 flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1d2436] cursor-pointer"
+                            >
+                              {copiedIp === url ? (
+                                <>
+                                  <Check className="w-3 h-3 text-emerald-500" />
+                                  <span>Copied</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3" />
+                                  <span>Copy</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>
+                    Browser WebRTC Mode (Standalone)
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  WebRTC mode plays web-seeded torrents directly in your browser. To unlock ANY magnet link or torrent (TCP/UDP swarms) and stream to mobile devices, start the streaming server:
+                </p>
+                <div className="bg-slate-900 text-amber-400 font-mono text-[11px] p-2 rounded-lg border border-slate-800">
+                  npm run server
+                </div>
+              </div>
+            )}
+          </div>
           {/* WebSocket Trackers */}
           <div>
             <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
@@ -145,7 +240,7 @@ export function SettingsModal({ isOpen, onClose }) {
               <h4>Local device storage</h4>
             </div>
             <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
-              Magnet Player saves watch history, resume positions, custom settings, and browser stream cache locally on this device.
+              Torrent Player saves watch history, resume positions, custom settings, and browser stream cache locally on this device.
             </p>
 
             <div className="flex items-center justify-between text-xs py-2 border-y border-slate-200 dark:border-[#1e2538]">
