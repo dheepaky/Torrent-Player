@@ -34,7 +34,7 @@ export const Footer = memo(function Footer({ onOpenLegal, onOpenAbout }) {
         </div>
 
         <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-          © 2026 Magnet Player. No files, torrents, or personal data are stored on any server.
+          © 2026 Torrent Player. No files, torrents, or personal data are stored on any server.
         </p>
       </div>
     </footer>

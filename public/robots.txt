@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Canonical XML Sitemap
-Sitemap: https://dheepaky.github.io/magnet/sitemap.xml
+Sitemap: https://dheepaky.github.io/Torrent-Player/sitemap.xml
