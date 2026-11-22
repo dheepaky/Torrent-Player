@@ -1,6 +1,4 @@
-# Allow all web crawlers including Googlebot, Bingbot, etc.
 User-agent: *
 Allow: /
 
-# Canonical XML Sitemap
 Sitemap: https://dheepaky.github.io/Torrent-Player/sitemap.xml
