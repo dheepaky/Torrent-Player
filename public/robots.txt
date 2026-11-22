@@ -1,0 +1,6 @@
+# Allow all web crawlers including Googlebot, Bingbot, etc.
+User-agent: *
+Allow: /
+
+# Canonical XML Sitemap
+Sitemap: https://dheepaky.github.io/magnet/sitemap.xml
