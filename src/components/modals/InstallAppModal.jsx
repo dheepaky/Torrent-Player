@@ -77,24 +77,63 @@ export function InstallAppModal({ isOpen, onClose, installPrompt }) {
 
         {/* Content Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
-          {/* 1-Click Install CTA if browser supports prompt */}
+          {/* Main Hero: Native Desktop App (Full TCP/UDP Swarms) */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/35 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+                  <Laptop className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
+                      Native Desktop App (Recommended)
+                    </h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      Full BitTorrent Engine
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                    Unlocks <strong className="text-slate-900 dark:text-white">ANY movie, torrent, or magnet link</strong> (TCP, UDP, and DHT swarms) with zero browser sandbox restrictions!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-amber-500/20 flex flex-col sm:flex-row items-center gap-2">
+              <a
+                href="https://github.com/dheepaky/Torrent-Player/releases/latest"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-xs sm:text-sm"
+              >
+                <Download className="w-4 h-4 stroke-[2.5]" />
+                <span>Download Desktop App (.exe / .AppImage)</span>
+              </a>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              ✓ Built-in Node.js streaming engine • Zero terminal commands • Unlimited streaming
+            </p>
+          </div>
+
+          {/* 1-Click PWA Browser Shortcut */}
           {installPrompt && !isInstalled && (
-            <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/15 to-amber-500/5 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b] flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-center sm:text-left">
-                <span className="font-bold text-slate-900 dark:text-white block text-sm">
-                  1-Click Direct Install Ready
+                <span className="font-bold text-slate-900 dark:text-white block text-xs sm:text-sm">
+                  Or Install as Browser Web Shortcut (PWA)
                 </span>
-                <span className="text-[11px] text-slate-600 dark:text-slate-300">
-                  Your browser supports direct web app installation.
+                <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Runs the web version in a standalone browser window (WebRTC mode).
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleNativeInstall}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#1d2538] dark:hover:bg-[#253047] text-slate-800 dark:text-slate-200 font-bold transition-all text-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
               >
-                <Download className="w-4 h-4" />
-                <span>Install Now</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>Install Web Shortcut</span>
               </button>
             </div>
           )}
