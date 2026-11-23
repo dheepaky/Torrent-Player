@@ -1,0 +1,29 @@
+{
+  "name": "Torrent Player - In-Browser Torrent & Magnet Streamer",
+  "short_name": "Torrent Player",
+  "description": "Stream torrents and magnet links directly in your web browser with WebRTC. Zero downloads, instant video streaming, no installation required.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e17",
+  "theme_color": "#0b0e17",
+  "categories": [
+    "utilities",
+    "entertainment",
+    "video"
+  ],
+  "icons": [
+    {
+      "src": "./favicon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

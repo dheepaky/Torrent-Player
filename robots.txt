@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dheepaky.github.io/Torrent-Player/sitemap.xml
