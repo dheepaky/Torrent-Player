@@ -72,7 +72,7 @@ function MainContent() {
         setIsDragging(false)
         dragCounter = 0
       }
-    }
+    } 
 
     const handleDragOver = (e) => {
       e.preventDefault()
