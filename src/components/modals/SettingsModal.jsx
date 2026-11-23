@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react'
 import * as storage from '../../utils/storage'
 import { formatBytes } from '../../utils/format'
 import { useWebTorrent } from '../../context/WebTorrentContext'
-import { Settings, X, HardDrive, Trash2, Check, Smartphone, Server, RefreshCw, Copy } from 'lucide-react'
+import { Settings, X, HardDrive, Trash2, Check, Smartphone, Server, RefreshCw, Copy, Cloud, Globe } from 'lucide-react'
 
 export function SettingsModal({ isOpen, onClose }) {
-  const { backendInfo, detectBackend } = useWebTorrent()
+  const { backendInfo, detectBackend, updateCustomBackendUrl } = useWebTorrent()
   const [trackersText, setTrackersText] = useState('')
   const [maxConns, setMaxConns] = useState(55)
+  const [backendUrlInput, setBackendUrlInput] = useState('')
+  const [backendTestStatus, setBackendTestStatus] = useState(null)
+  const [isTestingBackend, setIsTestingBackend] = useState(false)
   const [storageEstimate, setStorageEstimate] = useState({ usage: 0, quota: 0 })
   const [statusMsg, setStatusMsg] = useState('')
   const [isClearingAll, setIsClearingAll] = useState(false)
@@ -17,9 +20,28 @@ export function SettingsModal({ isOpen, onClose }) {
     const s = storage.loadSettings()
     setTrackersText(s.trackers.join('\n'))
     setMaxConns(s.maxConns || 55)
+    setBackendUrlInput(storage.getSavedBackendUrl())
+    setBackendTestStatus(null)
 
     const est = await storage.getStorageEstimate()
     setStorageEstimate(est)
+  }
+
+  const handleSaveBackendUrl = async () => {
+    setIsTestingBackend(true)
+    setBackendTestStatus(null)
+    const success = await updateCustomBackendUrl(backendUrlInput)
+    setIsTestingBackend(false)
+    if (success) {
+      setBackendTestStatus({ ok: true, msg: 'Connected successfully to streaming engine!' })
+    } else {
+      setBackendTestStatus({
+        ok: false,
+        msg: backendUrlInput.trim()
+          ? 'Failed to reach engine. Verify the URL is running and CORS is enabled.'
+          : 'Reverted to default / local engine detection.',
+      })
+    }
   }
 
   useEffect(() => {
@@ -107,42 +129,45 @@ export function SettingsModal({ isOpen, onClose }) {
 
         {/* Content */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm flex-1">
-          {/* Local Streaming Engine & Mobile Streaming Section */}
-          <div className="bg-slate-50 dark:bg-[#0b0e17] p-4 rounded-xl border border-slate-200 dark:border-[#1e2538] space-y-3">
+          {/* Streaming Engine (Cloud / Local / WebRTC) Section */}
+          <div className="bg-slate-50 dark:bg-[#0b0e17] p-4 rounded-xl border border-slate-200 dark:border-[#1e2538] space-y-3.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold">
                 <Server className="w-4 h-4 text-emerald-500" />
-                <h4>Local Streaming Engine &amp; Mobile Wi-Fi</h4>
+                <h4>Streaming Engine Configuration</h4>
               </div>
               <button
                 type="button"
-                onClick={detectBackend}
+                onClick={() => detectBackend()}
                 className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer"
                 title="Refresh engine status"
               >
                 <RefreshCw className="w-3 h-3" />
-                <span>Check status</span>
+                <span>Refresh</span>
               </button>
             </div>
 
+            {/* Current Engine Status */}
             {backendInfo?.isConnected ? (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-medium">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>
-                    Connected on port {backendInfo.port} — Full BitTorrent swarm streaming active.
+                    {backendInfo.isCloud
+                      ? `Connected to Cloud Streaming Engine (${backendInfo.baseUrl})`
+                      : `Connected to Local Streaming Engine on port ${backendInfo.port}`}
                   </span>
                 </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Full BitTorrent swarm streaming active (TCP, UDP, DHT, and WebRTC peers enabled).
+                </p>
 
-                {backendInfo.localIps && backendInfo.localIps.length > 0 && (
+                {backendInfo.localIps && backendInfo.localIps.length > 0 && !backendInfo.isCloud && (
                   <div className="mt-2 pt-2 border-t border-slate-200 dark:border-[#1e2538]">
                     <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-semibold mb-1 text-xs">
                       <Smartphone className="w-3.5 h-3.5 text-amber-500" />
                       <span>Stream on Mobile Phone (Same Wi-Fi):</span>
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mb-2">
-                      Open this URL in your mobile phone browser to stream directly:
-                    </p>
                     <div className="space-y-1">
                       {backendInfo.localIps.map((ip) => {
                         const url = `http://${ip}:${backendInfo.port}`
@@ -151,7 +176,7 @@ export function SettingsModal({ isOpen, onClose }) {
                             key={ip}
                             className="flex items-center justify-between bg-white dark:bg-[#131722] border border-slate-200 dark:border-[#232b3e] px-2.5 py-1.5 rounded-lg text-xs font-mono"
                           >
-                            <span className="text-amber-600 dark:text-amber-400 font-bold">
+                            <span className="text-amber-600 dark:text-amber-400 font-bold truncate mr-2">
                               {url}
                             </span>
                             <button
@@ -161,7 +186,7 @@ export function SettingsModal({ isOpen, onClose }) {
                                 setCopiedIp(url)
                                 setTimeout(() => setCopiedIp(null), 2000)
                               }}
-                              className="text-[10px] text-slate-600 dark:text-slate-300 hover:text-amber-500 flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1d2436] cursor-pointer"
+                              className="text-[10px] text-slate-600 dark:text-slate-300 hover:text-amber-500 flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1d2436] cursor-pointer shrink-0"
                             >
                               {copiedIp === url ? (
                                 <>
@@ -191,13 +216,50 @@ export function SettingsModal({ isOpen, onClose }) {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                  WebRTC mode plays web-seeded torrents directly in your browser. To unlock ANY magnet link or torrent (TCP/UDP swarms) and stream to mobile devices, start the streaming server:
+                  WebRTC mode plays web-seeded torrents directly in the browser. To stream ANY regular torrent (TCP/UDP movies and swarms), connect to a Cloud or Local streaming engine.
                 </p>
-                <div className="bg-slate-900 text-amber-400 font-mono text-[11px] p-2 rounded-lg border border-slate-800">
-                  npm run server
-                </div>
               </div>
             )}
+
+            {/* Custom / Cloud Backend Server URL Input */}
+            <div className="pt-2 border-t border-slate-200 dark:border-[#1e2538] space-y-2">
+              <label className="block font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                Cloud / Remote Streaming Server URL:
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="e.g. https://my-torrent-server.onrender.com"
+                  value={backendUrlInput}
+                  onChange={(e) => setBackendUrlInput(e.target.value)}
+                  className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-[#131722] border border-slate-300 dark:border-[#2b354d] text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveBackendUrl}
+                  disabled={isTestingBackend}
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold text-xs transition-all cursor-pointer shrink-0"
+                >
+                  {isTestingBackend ? 'Testing…' : 'Connect'}
+                </button>
+              </div>
+
+              {backendTestStatus && (
+                <div
+                  className={`text-[11px] font-medium ${
+                    backendTestStatus.ok
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                  }`}
+                >
+                  {backendTestStatus.msg}
+                </div>
+              )}
+
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                Tip: When using the Desktop App, the BitTorrent engine runs automatically with full TCP/UDP support. Mobile devices on the same Wi-Fi can stream directly using the local network addresses above.
+              </p>
+            </div>
           </div>
           {/* WebSocket Trackers */}
           <div>

@@ -197,8 +197,7 @@ export function MagnetInput() {
             <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2 animate-in fade-in">
               <span className="text-amber-500 font-bold shrink-0">💡 Tip:</span>
               <p>
-                Regular torrents require the streaming engine to connect to standard swarm peers. Run{' '}
-                <span className="font-mono font-bold text-amber-600 dark:text-amber-400">npm run server</span> in your project and open <span className="font-mono font-bold text-amber-600 dark:text-amber-400">http://localhost:4000</span> (or phone Wi-Fi port 4000) to stream any torrent instantly!
+                Regular torrents use standard TCP/UDP peers. Use the <strong>Torrent Player Desktop App</strong> or connect to the local Wi-Fi streaming engine to stream any movie instantly!
               </p>
             </div>
           )}

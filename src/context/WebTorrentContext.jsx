@@ -54,12 +54,45 @@ export function WebTorrentProvider({ children }) {
 
   backendInfoRef.current = backendInfo
 
-  // Auto-detect Local Node.js Backend or fallback to Browser WebTorrent
-  const detectBackend = useCallback(async () => {
-    // 1. Try relative /api/health (proxied by Vite or direct origin)
+  // Auto-detect Remote / Cloud, Local Node.js Backend, or fallback to Browser WebTorrent
+  const detectBackend = useCallback(async (customUrlOverride = null) => {
+    const customUrl =
+      customUrlOverride !== null
+        ? customUrlOverride
+        : (storage.getSavedBackendUrl() || import.meta.env.VITE_BACKEND_URL || '').trim()
+
+    // 1. Try Custom / Cloud Backend if configured
+    if (customUrl) {
+      const cleanUrl = customUrl.replace(/\/+$/, '')
+      try {
+        const res = await fetch(`${cleanUrl}/api/health`, {
+          signal: AbortSignal.timeout(3000),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.status === 'ok') {
+            const info = {
+              isConnected: true,
+              checked: true,
+              baseUrl: cleanUrl,
+              localIps: data.localIps || [],
+              port: data.port || 4000,
+              isCloud: !cleanUrl.includes('localhost') && !cleanUrl.includes('127.0.0.1'),
+            }
+            setBackendInfo(info)
+            setIsReady(true)
+            return true
+          }
+        }
+      } catch (err) {
+        console.warn(`[Backend Check] Could not connect to custom backend at ${cleanUrl}:`, err)
+      }
+    }
+
+    // 2. Try relative /api/health (when hosted together on Render, Railway, Fly, or Docker)
     try {
       const res = await fetch('/api/health', {
-        signal: AbortSignal.timeout(1500),
+        signal: AbortSignal.timeout(2000),
       })
       if (res.ok) {
         const data = await res.json()
@@ -70,6 +103,7 @@ export function WebTorrentProvider({ children }) {
             baseUrl: '',
             localIps: data.localIps || [],
             port: data.port || 4000,
+            isCloud: window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1',
           }
           setBackendInfo(info)
           setIsReady(true)
@@ -78,7 +112,7 @@ export function WebTorrentProvider({ children }) {
       }
     } catch {}
 
-    // 2. Try direct http://localhost:4000/api/health (CORS enabled)
+    // 3. Try direct http://localhost:4000/api/health (local development engine)
     try {
       const res = await fetch('http://localhost:4000/api/health', {
         signal: AbortSignal.timeout(1500),
@@ -92,6 +126,7 @@ export function WebTorrentProvider({ children }) {
             baseUrl: 'http://localhost:4000',
             localIps: data.localIps || [],
             port: data.port || 4000,
+            isCloud: false,
           }
           setBackendInfo(info)
           setIsReady(true)
@@ -100,18 +135,27 @@ export function WebTorrentProvider({ children }) {
       }
     } catch {}
 
-    // 3. Fallback to Browser WebTorrent (WebRTC mode)
+    // 4. Fallback to Browser WebTorrent (WebRTC mode)
     setBackendInfo({
       isConnected: false,
       checked: true,
       baseUrl: '',
       localIps: [],
       port: 4000,
+      isCloud: false,
     })
     const swReady = await initServiceWorkerServer()
     setIsReady(swReady)
     return false
   }, [])
+
+  const updateCustomBackendUrl = useCallback(
+    async (url) => {
+      storage.saveBackendUrl(url)
+      return await detectBackend(url)
+    },
+    [detectBackend]
+  )
 
   useEffect(() => {
     detectBackend()
@@ -505,7 +549,7 @@ export function WebTorrentProvider({ children }) {
                   count: elapsed,
                   message:
                     elapsed >= 30
-                      ? `No WebRTC peers found after ${elapsed}s. Regular torrents require running the local streaming server on port 4000 ('npm run server'). See tips below!`
+                      ? `No WebRTC peers found after ${elapsed}s. Regular torrents require the Desktop App (with built-in TCP/UDP engine) or active WebRTC seeders.`
                       : 'Searching for WebRTC peers (Browser Mode)…',
                 }
               : prev
@@ -620,6 +664,7 @@ export function WebTorrentProvider({ children }) {
         canvasRef,
         backendInfo,
         detectBackend,
+        updateCustomBackendUrl,
         downloadTorrent,
         cancelTorrent,
         playFile,

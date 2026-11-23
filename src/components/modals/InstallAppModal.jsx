@@ -213,30 +213,52 @@ export function InstallAppModal({ isOpen, onClose, installPrompt }) {
             )}
 
             {activePlatform === 'desktop' && (
-              <div className="space-y-2.5">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                    1
-                  </span>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    Open in Chrome, Edge, Brave, or Opera.
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                    <Laptop className="w-4 h-4 text-amber-500" />
+                    <span>Native Standalone Desktop App (Recommended)</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Runs the high-speed BitTorrent engine natively on your PC. Streams ANY magnet link (TCP, UDP, DHT) directly with zero browser restrictions.
                   </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                      ✓ No terminal or Node.js needed for end users
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                    2
+
+                <div className="space-y-2 pt-1">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Or Install as Chrome / Edge Web App (PWA):
                   </span>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    Click the <strong>Install icon (⊕ or 💻)</strong> on the right side of the URL address bar.
-                  </p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                    3
-                  </span>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    Click <strong>Install</strong> to launch Torrent Player in its own standalone window.
-                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        1
+                      </span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        Open in Chrome, Edge, Brave, or Opera.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        2
+                      </span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        Click the <strong>Install icon (⊕ or 💻)</strong> on the right side of the URL address bar.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        3
+                      </span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        Click <strong>Install</strong> to launch Torrent Player in its own standalone window.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

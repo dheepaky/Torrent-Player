@@ -5,6 +5,7 @@ import {
   Sparkles,
   Smartphone,
   Server,
+  Laptop,
   Wifi,
   ChevronDown,
   ChevronUp,
@@ -16,17 +17,10 @@ import {
 export function InstructionsSection() {
   const { downloadTorrent, torrent, backend } = useWebTorrent()
   const [showTips, setShowTips] = useState(true)
-  const [copiedCmd, setCopiedCmd] = useState(false)
 
   if (torrent) return null
 
   const exampleUrl = 'https://webtorrent.io/torrents/sintel.torrent'
-
-  const handleCopyCmd = () => {
-    navigator.clipboard.writeText('npm run server')
-    setCopiedCmd(true)
-    setTimeout(() => setCopiedCmd(false), 2000)
-  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 mt-6 space-y-4 text-sm sm:text-base">
@@ -43,8 +37,8 @@ export function InstructionsSection() {
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
                 {backend?.isConnected
-                  ? '✅ Local Streaming Engine is active on port 4000. All torrents enabled!'
-                  : 'Pure browser mode streams WebRTC torrents. Follow these quick tips for regular torrents:'}
+                  ? '✅ Streaming Engine is active. All standard BitTorrent swarms enabled!'
+                  : 'Pure browser mode streams WebRTC torrents. Follow these tips for regular torrents:'}
               </p>
             </div>
           </div>
@@ -64,37 +58,21 @@ export function InstructionsSection() {
 
         {showTips && (
           <div className="mt-3.5 pt-3.5 border-t border-amber-500/20 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
-            {/* Step 1: Local Port 4000 Streaming */}
+            {/* Step 1: Native Desktop App */}
             <div className="bg-white dark:bg-[#111624] p-3.5 rounded-xl border border-slate-200 dark:border-[#222b40] flex flex-col justify-between space-y-2">
               <div>
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white mb-1 text-xs sm:text-sm">
-                  <Server className="w-4 h-4 text-amber-500" />
-                  <span>1. Unlock Regular Torrents (Port 4000)</span>
+                  <Laptop className="w-4 h-4 text-amber-500" />
+                  <span>1. Native Desktop App (TCP/UDP Swarms)</span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  99% of magnet links use regular BitTorrent swarms. To stream them, start the local server in your project folder:
+                  99% of magnet links use standard BitTorrent swarms. Use the <strong>Torrent Player Desktop App</strong> (.exe / .AppImage) with built-in engine to stream all movies with zero configuration!
                 </p>
               </div>
 
-              <div className="flex items-center justify-between bg-slate-900 text-amber-400 font-mono text-xs sm:text-sm px-3 py-2 rounded-xl border border-slate-800">
-                <span>npm run server</span>
-                <button
-                  type="button"
-                  onClick={handleCopyCmd}
-                  className="hover:text-white transition-colors cursor-pointer ml-2 text-xs flex items-center gap-1.5 font-sans font-semibold"
-                  title="Copy command"
-                >
-                  {copiedCmd ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                  <span>{copiedCmd ? 'Copied' : 'Copy'}</span>
-                </button>
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 font-medium">
+                ✓ Built-in high-speed engine — zero terminal commands needed!
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Then open <span className="font-mono text-amber-500 font-semibold">http://localhost:4000</span> in your browser.
-              </p>
             </div>
 
             {/* Step 2: Stream on Mobile Phone */}
@@ -105,7 +83,7 @@ export function InstructionsSection() {
                   <span>2. Stream on Mobile Phone (Same Wi-Fi)</span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Connect your phone (iPhone or Android) to the same Wi-Fi network as your computer, then open in your mobile browser:
+                  Connect your phone (iPhone or Android) to the same Wi-Fi as your computer running the app, then open the local Wi-Fi URL from <strong>Settings ⚙️</strong>:
                 </p>
               </div>
 
@@ -115,7 +93,7 @@ export function InstructionsSection() {
 
               <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Supports rotate screen, zoom / fit screen, and touch 2X speed!</span>
+                <span>Zero device storage used — stream in RAM!</span>
               </p>
             </div>
           </div>

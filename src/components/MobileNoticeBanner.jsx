@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
   Smartphone,
   Server,
+  Laptop,
   Download,
   Wifi,
   ChevronDown,
@@ -17,7 +18,6 @@ export function MobileNoticeBanner({ onOpenInstallApp }) {
   const { backendInfo, torrent } = useWebTorrent()
   const [isDismissed, setIsDismissed] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const [copiedCmd, setCopiedCmd] = useState(false)
   const [isMobileDevice, setIsMobileDevice] = useState(false)
 
   useEffect(() => {
@@ -37,13 +37,7 @@ export function MobileNoticeBanner({ onOpenInstallApp }) {
     sessionStorage.setItem('dismiss_mobile_notice', 'true')
   }
 
-  const handleCopyCmd = () => {
-    navigator.clipboard.writeText('npm run server')
-    setCopiedCmd(true)
-    setTimeout(() => setCopiedCmd(false), 2000)
-  }
-
-  if (isDismissed || torrent) return null
+  if (isDismissed || torrent || backendInfo?.isConnected) return null
 
   return (
     <div className="max-w-3xl mx-auto px-4 mt-3 sm:mt-4">
@@ -104,37 +98,18 @@ export function MobileNoticeBanner({ onOpenInstallApp }) {
         {/* Collapsible Action Guide */}
         {isExpanded && (
           <div className="mt-3.5 pt-3.5 border-t border-amber-500/20 grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1">
-            {/* Method A: Local Streaming Engine (Port 4000) */}
+            {/* Method A: Desktop App Engine */}
             <div className="bg-white/90 dark:bg-[#0e1320] p-3.5 rounded-xl border border-slate-200 dark:border-[#222b40] space-y-2 shadow-xs">
               <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
-                <Server className="w-4 h-4 text-amber-500" />
-                <span>1. Stream via PC Server (Port 4000)</span>
+                <Laptop className="w-4 h-4 text-amber-500" />
+                <span>1. Stream via PC Desktop App (Wi-Fi)</span>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-snug">
-                Run the streaming engine on your computer:
+                Run the <strong>Torrent Player Desktop App</strong> on your computer. It unlocks full TCP/UDP streaming swarms for your phone automatically!
               </p>
-              <div className="flex items-center justify-between bg-slate-900 text-amber-400 font-mono text-xs sm:text-sm px-3 py-2 rounded-xl border border-slate-800">
-                <span>npm run server</span>
-                <button
-                  type="button"
-                  onClick={handleCopyCmd}
-                  className="hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1.5 ml-2 font-sans font-semibold"
-                >
-                  {copiedCmd ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                  <span>{copiedCmd ? 'Copied' : 'Copy'}</span>
-                </button>
+              <div className="p-2 rounded-lg bg-slate-100 dark:bg-[#161b2a] border border-slate-200 dark:border-[#263047] text-xs text-slate-700 dark:text-slate-300">
+                <span className="font-semibold text-amber-500">How to connect:</span> Connect your phone to the same Wi-Fi as your PC, then open the local network link shown in <strong>Settings ⚙️</strong>.
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Then connect your phone to the same Wi-Fi and open{' '}
-                <span className="font-mono text-amber-500 font-bold">
-                  http://&lt;pc-ip&gt;:4000
-                </span>
-                .
-              </p>
             </div>
 
             {/* Method B: Install App / PWA */}

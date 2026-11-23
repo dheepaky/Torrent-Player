@@ -3,6 +3,11 @@ node_modules/
 
 # Production build output
 dist/
+release/
+*.AppImage
+*.exe
+*.dmg
+*.blockmap
 
 # Local environment & system files
 .DS_Store

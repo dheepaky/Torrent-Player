@@ -2,6 +2,25 @@
 
 export const SETTINGS_KEY = 'magnet_player_settings'
 export const HISTORY_KEY = 'magnet_player_history'
+export const BACKEND_URL_KEY = 'magnet_custom_backend_url'
+
+export function getSavedBackendUrl() {
+  try {
+    return localStorage.getItem(BACKEND_URL_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+export function saveBackendUrl(url) {
+  try {
+    if (!url || typeof url !== 'string' || !url.trim()) {
+      localStorage.removeItem(BACKEND_URL_KEY)
+    } else {
+      localStorage.setItem(BACKEND_URL_KEY, url.trim().replace(/\/+$/, ''))
+    }
+  } catch {}
+}
 
 export const DEFAULT_TRACKERS = [
   'wss://tracker.openwebtorrent.com',

@@ -41,6 +41,38 @@ npm run build
 npm run preview
 ```
 
+### Desktop Application (Electron)
+
+Run and package Torrent Player as a native desktop application with full BitTorrent (TCP/UDP/DHT) streaming support:
+
+```bash
+# Launch Electron Desktop App in development (with live Vite reload)
+npm run electron:dev
+
+# Run production Electron Desktop App
+npm run electron
+
+# Build standalone executables to release/
+npm run electron:build        # Build for current OS
+npm run electron:build:win    # Build Windows .exe installer & portable
+npm run electron:build:linux  # Build Linux .AppImage
+npm run electron:build:mac    # Build macOS .dmg
+```
+
+---
+
+## ⚡ How It Works (Zero Cloud Bans, Unlimited Streaming)
+
+1. **Native Desktop Engine (PC / Mac / Linux):**
+   - The desktop app runs our high-performance BitTorrent streaming engine directly on the user's computer.
+   - Unlocks full access to all standard torrent swarms (TCP, UDP, and DHT) with zero browser restrictions.
+   - **No cloud servers:** Zero risk of account bans, zero monthly hosting costs, and unlimited bandwidth.
+   - **No terminal or Node.js required:** End users simply download and run the `.exe` / `.AppImage`.
+
+2. **Mobile Phone Streaming (Same Wi-Fi):**
+   - When the Desktop App is running, it automatically opens local network streaming.
+   - Mobile users (iOS / Android) connected to the same Wi-Fi can open the local IP displayed in **Settings ⚙️** and stream any movie directly on their phone screen.
+
 ---
 
 ## Project Structure
