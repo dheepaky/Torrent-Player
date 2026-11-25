@@ -1,0 +1,26 @@
+# Node dependencies
+node_modules/
+
+# Production build output
+dist/
+release/
+*.AppImage
+*.exe
+*.dmg
+*.blockmap
+
+# Android build output
+android/app/src/main/assets/dist/
+android/.gradle/
+android/app/build/
+android/build/
+release-android/
+*.apk
+*.aab
+
+# Local environment & system files
+.DS_Store
+*.log
+.env
+.env.local
+.env.*.local

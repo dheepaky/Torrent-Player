@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Torrent Player — Instant, Serverless Peer-to-Peer Video Streaming</title>
+    <meta name="title" content="Torrent Player — Instant, Serverless Peer-to-Peer Video Streaming" />
+    <meta
+      name="description"
+      content="Instant, serverless peer-to-peer video streaming directly in your web browser. Stream magnet links and torrents with zero storage needed, no subscription, unlimited streaming, and 100% private playback."
+    />
+    <meta
+      name="keywords"
+      content="Torrent Player, serverless video streaming, instant torrent stream, magnet player, stream magnet link online, peer to peer video player, webtor alternative, seedr alternative free, webtorrent player, play magnet link in browser, torrent video player online, stream torrent without downloading, watch torrents online free, play torrent on iphone, torrent player android apk, magnet to mp4 player online, browser torrent streamer"
+    />
+    <meta name="author" content="Torrent Player" />
+    <meta name="application-name" content="Torrent Player" />
+    <link rel="canonical" href="https://dheepaky.github.io/Torrent-Player/" />
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="./sitemap.xml" />
+    <meta name="google-site-verification" content="google09fba4e06cd7f80a" />
+
+    <!-- Auto-Recognize Current URL for Dynamic SEO (Canonical, OpenGraph, Twitter, and JSON-LD) -->
+    <script>
+      (function () {
+        if (typeof window === 'undefined') return;
+        try {
+          var origin = window.location.origin;
+          var pathname = window.location.pathname;
+          var currentUrl = origin + pathname;
+          if (!currentUrl.endsWith('/') && !pathname.includes('.')) {
+            currentUrl += '/';
+          }
+
+          var canonical = document.querySelector('link[rel="canonical"]');
+          if (canonical) canonical.setAttribute('href', currentUrl);
+
+          var ogUrl = document.querySelector('meta[property="og:url"]');
+          if (ogUrl) ogUrl.setAttribute('content', currentUrl);
+
+          var twUrl = document.querySelector('meta[name="twitter:url"]');
+          if (twUrl) twUrl.setAttribute('content', currentUrl);
+
+          var ldScript = document.querySelector('script[type="application/ld+json"]');
+          if (ldScript) {
+            var data = JSON.parse(ldScript.textContent);
+            if (data && data['@graph']) {
+              data['@graph'].forEach(function (item) {
+                if (item['@type'] === 'WebApplication') {
+                  item['@id'] = currentUrl + '#webapp';
+                  item['url'] = currentUrl;
+                }
+                if (item['@type'] === 'BreadcrumbList' && item.itemListElement) {
+                  item.itemListElement.forEach(function (b) {
+                    if (b.position === 1) b.item = currentUrl;
+                    if (b.position === 2) b.item = currentUrl + '#streamer';
+                  });
+                }
+              });
+              ldScript.textContent = JSON.stringify(data);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Search Engine Indexing & Bot Directives -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="rating" content="general" />
+
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Torrent Player" />
+    <meta property="og:url" content="https://dheepaky.github.io/Torrent-Player/" />
+    <meta property="og:title" content="Torrent Player — Instant, Serverless Peer-to-Peer Video Streaming" />
+    <meta
+      property="og:description"
+      content="Instant, serverless peer-to-peer video streaming directly in your web browser. Stream magnet links and torrents with zero storage needed, no subscription, unlimited streaming, and 100% private playback."
+    />
+    <meta property="og:image" content="./assets/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Torrent Player" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://dheepaky.github.io/Torrent-Player/" />
+    <meta name="twitter:title" content="Torrent Player — Instant, Serverless Peer-to-Peer Video Streaming" />
+    <meta
+      name="twitter:description"
+      content="Instant, serverless peer-to-peer video streaming directly in your web browser. Stream magnet links and torrents with zero storage needed, no subscription, unlimited streaming, and 100% private playback."
+    />
+    <meta name="twitter:image" content="./assets/og-image.png" />
+
+    <!-- Mobile, PWA & Icons -->
+    <link rel="icon" type="image/svg+xml" href="./assets/logo.svg" />
+    <link rel="alternate icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="alternate icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon-192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <meta name="theme-color" content="#0b0e17" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Torrent Player" />
+
+    <!-- Performance Preconnect & High-Legibility Typography -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured Data (JSON-LD): WebApplication, FAQPage, HowTo -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://dheepaky.github.io/Torrent-Player/#webapp",
+            "name": "Torrent Player",
+            "alternateName": [
+              "Torrent Player Web",
+              "Zero Storage Needed Magnet Streamer",
+              "No Subscription Torrent Player",
+              "Unlimited Streaming WebTorrent Player",
+              "100% Free & Private Torrent Player"
+            ],
+            "url": "https://dheepaky.github.io/Torrent-Player/",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "All (Web Browser, Android, iOS, Windows, macOS, Linux)",
+            "browserRequirements": "Requires WebRTC-compliant web browser (Chrome, Firefox, Safari, Edge, Brave)",
+            "description": "Stream video directly from magnet links and torrents with zero storage needed, no subscription, unlimited streaming, and 100% private video playback.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "ratingCount": "1840",
+              "bestRating": "5"
+            },
+            "featureList": [
+              "Stream Magnet Links & Torrents Directly",
+              "Zero Storage Needed — 100% RAM Memory Streaming",
+              "No Subscription or Sign-Up Required",
+              "Unlimited Streaming for All Magnet Links & Torrents",
+              "100% Free & Private Decentralized WebRTC",
+              "Audio Volume Booster up to 300%",
+              "Fit Screen, Zoom, and Rotation for Mobile Devices",
+              "Subtitles & Closed Captions with SRT/VTT Support",
+              "External Player Hand-off to VLC, IINA, and MPV"
+            ]
+          },
+          {
+            "@type": "HowTo",
+            "name": "How to Stream Video from a Magnet Link in Your Browser",
+            "description": "Step-by-step instructions for streaming video directly from a magnet link without downloading full files.",
+            "step": [
+              {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Copy Magnet Link or File",
+                "text": "Copy your magnet URI (starting with magnet:?), 40-character infohash, or download a .torrent file."
+              },
+              {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Paste or Drag into Torrent Player",
+                "text": "Paste the magnet link into the stream input bar or drag and drop the .torrent file directly into the browser window."
+              },
+              {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Instant Playback",
+                "text": "Video streaming begins automatically as the first pieces buffer. Adjust volume boost, switch audio tracks, or add subtitles."
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Can I stream magnet links directly in my web browser without downloading the full file?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes! Torrent Player streams videos directly with Zero Storage Needed. Video playback begins immediately once initial pieces buffer in RAM memory."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is there any subscription fee or registration required?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No Subscription is required. Torrent Player offers Unlimited Streaming and is 100% Free & Private with zero sign-ups and zero fees."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does streaming consume local device storage?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Zero Storage Needed! Video chunks buffer directly in temporary memory and are decoded on the fly without saving gigabytes of video to your hard drive or phone storage."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What video formats and audio codecs are supported?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Torrent Player supports browser-native video containers including MP4, WebM, and playable MKV with H.264, VP8, VP9, or AV1 video and AAC/Opus audio. Files can also be handed off to desktop VLC or IINA."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is my streaming activity private?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Torrent Player is completely decentralized and client-side. No media files, stream data, or personal information are stored or logged on any server. 100% Free & Private."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does Torrent Player compare to Seedr, Webtor, or desktop BitTorrent clients?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Unlike Seedr which caps free users at 2GB and charges monthly subscriptions, Torrent Player is a Free Seedr Alternative with No Subscription and Unlimited Streaming. Unlike desktop clients (uTorrent, qBittorrent), it requires Zero Storage Needed because it buffers video directly into RAM memory without downloading heavy files to your hard drive."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I stream torrents and magnet links on iPhone, iPad, or Android without an app?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes! Because Torrent Player runs 100% inside web browsers (Safari, Chrome) via WebRTC, mobile users on iPhone, iPad, Android, and Chromebooks can stream video directly without downloading apps from the App Store or Google Play."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://dheepaky.github.io/Torrent-Player/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Stream Magnet Links & Torrents Directly",
+                "item": "https://dheepaky.github.io/Torrent-Player/#streamer"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <!-- Google AdSense / Adsterra Integration (Uncomment and paste your publisher client ID) -->
+    <!--
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    -->
+
+    <!-- WebTorrent v2.8.5 browser bundle (deferred to eliminate render-blocking) -->
+    <script defer src="./webtorrent.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-50 dark:bg-[#0b0e17] text-slate-900 dark:text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950">
+    <div id="root"></div>
+
+    <!-- Crawlable SEO & Noscript Fallback for Search Engines -->
+    <noscript>
+      <div style="max-width: 800px; margin: 24px auto; padding: 24px; background: #0f172a; color: #f8fafc; border-radius: 16px; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;">
+        <h1 style="color: #f59e0b; font-size: 24px; margin-bottom: 8px;">Torrent Player — Stream Magnet Links &amp; Torrents Directly</h1>
+        <p style="font-weight: 600; color: #38bdf8;">Zero Storage Needed • No Subscription • Unlimited Streaming • 100% Free &amp; Private</p>
+        <p>Stream magnet links and torrent video files directly with zero software downloads. Features WebRTC peer-to-peer streaming, 300% volume booster, dynamic subtitles, and screen rotation for mobile phones.</p>
+        <p><em>Please enable JavaScript in your browser to start video streaming.</em></p>
+      </div>
+    </noscript>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

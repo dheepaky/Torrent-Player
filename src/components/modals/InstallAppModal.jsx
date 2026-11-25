@@ -1,0 +1,416 @@
+import React, { useState, useEffect } from 'react'
+import {
+  Download,
+  Smartphone,
+  Laptop,
+  CheckCircle2,
+  X,
+  Share,
+  PlusSquare,
+  Sparkles,
+  Zap,
+} from 'lucide-react'
+
+export function InstallAppModal({ isOpen, onClose, installPrompt }) {
+  const [activePlatform, setActivePlatform] = useState('auto')
+  const [isInstalled, setIsInstalled] = useState(false)
+
+  useEffect(() => {
+    // Detect OS / Platform
+    const ua = navigator.userAgent || ''
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      setActivePlatform('ios')
+    } else if (/Android/i.test(ua)) {
+      setActivePlatform('android')
+    } else {
+      setActivePlatform('desktop')
+    }
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true)
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const handleNativeInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt()
+      const { outcome } = await installPrompt.userChoice
+      if (outcome === 'accepted') {
+        setIsInstalled(true)
+        onClose()
+      }
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#131722] border border-slate-200 dark:border-[#232b3e] rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-800 dark:text-slate-100">
+        {/* Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-[#232b3e] flex items-center justify-between bg-slate-50 dark:bg-[#0b0e17]/80">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-500 shrink-0">
+              <Download className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg leading-tight flex items-center gap-1.5">
+                <span>Install Torrent Player</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                  Web App
+                </span>
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                Fast, Zero Storage, Native Full-Screen Streaming
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1a2030] transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
+          {/* Main Hero: Native Desktop App (Full TCP/UDP Swarms) */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/35 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+                  <Laptop className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
+                      Native Desktop App (Recommended)
+                    </h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      Full BitTorrent Engine
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                    Unlocks <strong className="text-slate-900 dark:text-white">ANY movie, torrent, or magnet link</strong> (TCP, UDP, and DHT swarms) with zero browser sandbox restrictions!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-amber-500/20 flex flex-col sm:flex-row items-center gap-2">
+              <a
+                href="https://github.com/dheepaky/Torrent-Player/releases/latest"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-xs sm:text-sm"
+              >
+                <Download className="w-4 h-4 stroke-[2.5]" />
+                <span>Download App (Windows, Mac, Linux &amp; Android APK)</span>
+              </a>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              ✓ Includes .exe, .AppImage, .deb, .dmg, and .apk • Zero terminal commands
+            </p>
+          </div>
+
+          {/* 1-Click PWA Browser Shortcut */}
+          {installPrompt && !isInstalled && (
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b] flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-center sm:text-left">
+                <span className="font-bold text-slate-900 dark:text-white block text-xs sm:text-sm">
+                  Or Install as Browser Web Shortcut (PWA)
+                </span>
+                <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Runs the web version in a standalone browser window (WebRTC mode).
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleNativeInstall}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#1d2538] dark:hover:bg-[#253047] text-slate-800 dark:text-slate-200 font-bold transition-all text-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Install Web Shortcut</span>
+              </button>
+            </div>
+          )}
+
+          {/* Platform Tab Switcher */}
+          <div>
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Step-by-Step Installation Guide:
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-[#0e121d] rounded-xl border border-slate-200 dark:border-[#1f273b] text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setActivePlatform('ios')}
+                className={`py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  activePlatform === 'ios'
+                    ? 'bg-white dark:bg-[#1d2538] text-amber-600 dark:text-amber-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>iPhone / iPad</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePlatform('android')}
+                className={`py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  activePlatform === 'android'
+                    ? 'bg-white dark:bg-[#1d2538] text-amber-600 dark:text-amber-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Android</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePlatform('desktop')}
+                className={`py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  activePlatform === 'desktop'
+                    ? 'bg-white dark:bg-[#1d2538] text-amber-600 dark:text-amber-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                }`}
+              >
+                <Laptop className="w-3.5 h-3.5" />
+                <span>PC / Mac</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Guide Details */}
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b] space-y-3">
+            {activePlatform === 'ios' && (
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    1
+                  </span>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    Open this site in <strong>Safari</strong> on your iPhone or iPad.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    2
+                  </span>
+                  <p className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
+                    <span>Tap the</span>
+                    <strong className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-200 dark:bg-[#1e2538] rounded text-slate-900 dark:text-white font-mono text-xs">
+                      <Share className="w-3 h-3 text-sky-500" /> Share
+                    </strong>
+                    <span>button at the bottom bar.</span>
+                  </p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    3
+                  </span>
+                  <p className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
+                    <span>Scroll down and select</span>
+                    <strong className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-200 dark:bg-[#1e2538] rounded text-slate-900 dark:text-white font-mono text-xs">
+                      <PlusSquare className="w-3 h-3 text-amber-500" /> Add to Home Screen
+                    </strong>
+                    <span>then tap <strong>Add</strong>.</span>
+                  </p>
+                </div>
+
+                <div className="mt-2.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/25 text-[11px] text-slate-700 dark:text-slate-300">
+                  <span className="font-bold text-amber-500">💡 Full Swarm Mobile Tip:</span> To stream ANY movie torrent (TCP/UDP) on your iPhone, run the Desktop App on your PC (same Wi-Fi) and open the local Wi-Fi URL from <strong>Settings ⚙️</strong>.
+                </div>
+              </div>
+            )}
+
+            {activePlatform === 'android' && (
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                      Standalone Android App (APK)
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      Native App
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">
+                    Install the native Android app directly on your phone with full launcher icon and zero browser frame.
+                  </p>
+                  <a
+                    href="https://github.com/dheepaky/Torrent-Player/releases/latest"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="w-full px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 text-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Android APK (.apk)</span>
+                  </a>
+                </div>
+
+                <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pt-1">
+                  Or Add Web Shortcut via Chrome:
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    1
+                  </span>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    Open in <strong>Google Chrome</strong> or <strong>Samsung Internet</strong>.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    2
+                  </span>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    Tap the <strong>three dots menu (⋮)</strong> in the top-right corner.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    3
+                  </span>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.
+                  </p>
+                </div>
+
+                <div className="mt-2.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/25 text-[11px] text-slate-700 dark:text-slate-300">
+                  <span className="font-bold text-amber-500">💡 Full Swarm Mobile Tip:</span> To stream ANY movie torrent (TCP/UDP) on Android, run the Desktop App on your PC (same Wi-Fi) and open the local Wi-Fi URL from <strong>Settings ⚙️</strong>.
+                </div>
+              </div>
+            )}
+
+            {activePlatform === 'desktop' && (
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2.5">
+                  <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                    <Laptop className="w-4 h-4 text-amber-500" />
+                    <span>Native Standalone Desktop App (Windows, Linux, Mac)</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Runs the high-speed BitTorrent engine natively on your computer. Streams ANY magnet link (TCP, UDP, DHT) directly with zero browser restrictions.
+                  </p>
+
+                  {/* Platform Quick Download Buttons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+                    <a
+                      href="https://github.com/dheepaky/Torrent-Player/releases/latest"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="p-2 rounded-lg bg-white dark:bg-[#131722] hover:border-amber-500 border border-slate-200 dark:border-[#222b40] font-bold text-center text-slate-900 dark:text-white transition-all shadow-2xs flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span className="text-amber-500 font-extrabold">Windows</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">.exe installer</span>
+                    </a>
+                    <a
+                      href="https://github.com/dheepaky/Torrent-Player/releases/latest"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="p-2 rounded-lg bg-white dark:bg-[#131722] hover:border-amber-500 border border-slate-200 dark:border-[#222b40] font-bold text-center text-slate-900 dark:text-white transition-all shadow-2xs flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span className="text-emerald-500 font-extrabold">Linux</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">.AppImage / .deb</span>
+                    </a>
+                    <a
+                      href="https://github.com/dheepaky/Torrent-Player/releases/latest"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="p-2 rounded-lg bg-white dark:bg-[#131722] hover:border-amber-500 border border-slate-200 dark:border-[#222b40] font-bold text-center text-slate-900 dark:text-white transition-all shadow-2xs flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span className="text-sky-500 font-extrabold">macOS</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">.dmg installer</span>
+                    </a>
+                  </div>
+
+                  {/* Troubleshooting notes for Linux and Mac */}
+                  <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-[#111624] border border-slate-200 dark:border-[#1e2538] space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                    <p>
+                      <strong className="text-emerald-600 dark:text-emerald-400">Linux note:</strong> If double-clicking the AppImage does not open, make it executable: <code className="font-mono text-amber-500">chmod +x *.AppImage</code> (or install the <code className="font-mono text-amber-500">.deb</code> package).
+                    </p>
+                    <p>
+                      <strong className="text-sky-600 dark:text-sky-400">Mac note:</strong> On first launch, if Gatekeeper warns "unverified developer", right-click the app in Finder and select <strong>Open</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Or Install as Chrome / Edge Web App (PWA):
+                  </span>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        1
+                      </span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        Open in Chrome, Edge, Brave, or Opera.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        2
+                      </span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        Click the <strong>Install icon (⊕ or 💻)</strong> on the right side of the URL address bar.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                        3
+                      </span>
+                      <p className="text-slate-700 dark:text-slate-300">
+                        Click <strong>Install</strong> to launch Torrent Player in its own standalone window.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Advantages List */}
+          <div className="space-y-2 pt-1">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              Why Install the Web App?
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b]">
+                <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Full-screen borderless video</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Zero disk storage used</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b]">
+                <Sparkles className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">1-tap Home Screen launch</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#0e121d] border border-slate-200 dark:border-[#1f273b]">
+                <Smartphone className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Mobile rotation &amp; zoom</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-200 dark:border-[#232b3e] bg-slate-50/70 dark:bg-[#0b0e17]/50 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-slate-200 dark:bg-[#1a2130] hover:bg-slate-300 dark:hover:bg-[#232b3e] text-slate-800 dark:text-slate-200 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
